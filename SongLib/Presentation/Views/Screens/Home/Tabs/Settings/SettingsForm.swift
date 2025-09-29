@@ -39,7 +39,7 @@ struct SettingsForm: View {
             }
 
             #if !DEBUG
-            if !viewModel.activeSubscriber {
+            if !viewModel.isProUser {
                 SettingsSection(header: "SongLib Pro") {
                     SettingsRow(
                         systemImage: "star.fill",

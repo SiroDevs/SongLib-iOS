@@ -15,7 +15,7 @@ final class MainViewModel: ObservableObject {
     private let reviewRepo: ReviewReqRepositoryProtocol
     private let subsRepo: SubscriptionRepositoryProtocol
     
-    @Published var activeSubscriber: Bool = false
+    @Published var isProUser: Bool = false
     @Published var horizontalSlides: Bool = false
     @Published var showReviewPrompt: Bool = false
     
@@ -42,9 +42,9 @@ final class MainViewModel: ObservableObject {
     }
     
     func checkSubscription() {
-        subsRepo.isActiveSubscriber { [weak self] isActive in
+        subsRepo.isProUser { [weak self] isActive in
             DispatchQueue.main.async {
-                self?.activeSubscriber = isActive
+                self?.isProUser = isActive
             }
         }
     }

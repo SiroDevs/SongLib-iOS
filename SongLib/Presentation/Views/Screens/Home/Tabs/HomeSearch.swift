@@ -43,7 +43,7 @@ struct HomeSearch: View {
                     .padding(.vertical)
                 }
                 
-                if viewModel.activeSubscriber {
+                if viewModel.isProUser {
                     Button {
                         searchByNo = true
                         searchQry = ""

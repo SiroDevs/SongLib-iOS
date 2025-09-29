@@ -27,7 +27,7 @@ struct HomeTabs: View {
                     }
                     .background(.primaryContainer)
                 
-                if viewModel.activeSubscriber {
+                if viewModel.isProUser {
                     HomeListings(viewModel: viewModel)
                         .tabItem {
                             Label("Listings", systemImage: "list.number")
@@ -44,7 +44,7 @@ struct HomeTabs: View {
         }
         .onAppear {
             #if !DEBUG
-            showPaywall = !viewModel.activeSubscriber
+            showPaywall = !viewModel.isProUser
             viewModel.promptReview()
             #endif
         }

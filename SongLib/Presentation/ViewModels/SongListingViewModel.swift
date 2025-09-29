@@ -26,7 +26,7 @@ final class ListingViewModel: ObservableObject {
     @Published var listItems: [Listing] = []
     
     @Published var isLiked: Bool = false
-    @Published var activeSubscriber: Bool = false
+    @Published var isProUser: Bool = false
     @Published var listingTitle: String = "Untitled List"
 
     init(
@@ -42,12 +42,13 @@ final class ListingViewModel: ObservableObject {
     }
     
     func checkSubscription() {
-        subsRepo.isActiveSubscriber { [weak self] isActive in
+        subsRepo.isProUser { [weak self] isActive in
             DispatchQueue.main.async {
-                self?.activeSubscriber = isActive
+                self?.isProUser = isActive
             }
         }
     }
+    
     func loadListing(listing: Listing) {
         uiState = .loading("")
         
