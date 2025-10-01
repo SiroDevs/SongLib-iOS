@@ -40,20 +40,20 @@ struct DependencyMap {
             )
         }.inObjectScope(.container)
         
-        container.register(SongListingDataManager.self) { resolver in
-            SongListingDataManager(
+        container.register(ListingDataManager.self) { resolver in
+            ListingDataManager(
                 cdManager: resolver.resolve(CoreDataManager.self)!,
             )
         }.inObjectScope(.container)
         
-        container.register(QueryDataManager.self) { resolver in
-            QueryDataManager(
+        container.register(SearchDataManager.self) { resolver in
+            SearchDataManager(
                 cdManager: resolver.resolve(CoreDataManager.self)!,
             )
         }.inObjectScope(.container)
         
-        container.register(SongViewDataManager.self) { resolver in
-            SongViewDataManager(
+        container.register(HistoryDataManager.self) { resolver in
+            HistoryDataManager(
                 cdManager: resolver.resolve(CoreDataManager.self)!,
             )
         }.inObjectScope(.container)
@@ -68,7 +68,7 @@ struct DependencyMap {
         
         container.register(ListingRepositoryProtocol.self) { resolver in
             ListingRepository(
-                listData: resolver.resolve(SongListingDataManager.self)!,
+                listData: resolver.resolve(ListingDataManager.self)!,
             )
         }.inObjectScope(.container)
         
@@ -78,8 +78,8 @@ struct DependencyMap {
         
         container.register(TrackingRepositoryProtocol.self) { resolver in
             TrackingRepository(
-                viewData: resolver.resolve(SongViewDataManager.self)!,
-                queryData: resolver.resolve(QueryDataManager.self)!
+                historyData: resolver.resolve(HistoryDataManager.self)!,
+                searchData: resolver.resolve(SearchDataManager.self)!
             )
         }.inObjectScope(.container)
         
@@ -106,8 +106,8 @@ struct DependencyMap {
             )
         }.inObjectScope(.container)
         
-        container.register(SongListingViewModel.self) { resolver in
-            SongListingViewModel(
+        container.register(ListingViewModel.self) { resolver in
+            ListingViewModel(
                 prefsRepo: resolver.resolve(PreferencesRepository.self)!,
                 songbkRepo: resolver.resolve(SongBookRepositoryProtocol.self)!,
                 listRepo: resolver.resolve(ListingRepositoryProtocol.self)!,

@@ -41,7 +41,7 @@ struct SongsList: View {
         }
     }
     
-    func addSongToListing(song: Song, listing: SongListing){
+    func addSongToListing(song: Song, listing: Listing){
         selectedSong = nil
         viewModel.saveListItem(listing, song: song.songId)
         toastMessage = "\(song.title) added to \(listing.title) listing"

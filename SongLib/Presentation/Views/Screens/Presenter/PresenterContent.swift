@@ -10,7 +10,7 @@ import SwiftUIPager
 
 struct PresenterContent: View {
     @Environment(\.presentationMode) var presentationMode
-    @ObservedObject var viewModel: SongListingViewModel
+    @ObservedObject var viewModel: ListingViewModel
     @ObservedObject var selected: Page
     let song: Song
     

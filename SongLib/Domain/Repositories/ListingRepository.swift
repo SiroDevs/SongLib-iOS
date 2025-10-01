@@ -8,22 +8,22 @@
 import Foundation
 
 protocol ListingRepositoryProtocol {
-    func fetchListings(for parent: Int) -> [SongListing]
+    func fetchListings(for parent: Int) -> [Listing]
     func saveListing(_ parent: Int, title: String)
-    func saveListItem(_ parent: SongListing, song: Int)
-    func updateListing(_ listing: SongListing, title: String)
+    func saveListItem(_ parent: Listing, song: Int)
+    func updateListing(_ listing: Listing, title: String)
     func deleteListing(with id: Int)
     func deleteListings()
 }
 
 class ListingRepository: ListingRepositoryProtocol {
-    private let listData: SongListingDataManager
+    private let listData: ListingDataManager
     
-    init(listData: SongListingDataManager) {
+    init(listData: ListingDataManager) {
         self.listData = listData
     }
     
-    func fetchListings(for parent: Int) -> [SongListing] {
+    func fetchListings(for parent: Int) -> [Listing] {
         let listings = listData.fetchListings(with: parent)
         return listings.sorted { $1.modified < $0.modified }
     }
@@ -32,12 +32,12 @@ class ListingRepository: ListingRepositoryProtocol {
         listData.saveListing(parent, title: title, song: 0)
     }
     
-    func saveListItem(_ parent: SongListing, song: Int) {
+    func saveListItem(_ parent: Listing, song: Int) {
         listData.saveListing(parent.id, title: "", song: song)
         listData.updateListing(parent, title: parent.title)
     }
     
-    func updateListing(_ listing: SongListing, title: String) {
+    func updateListing(_ listing: Listing, title: String) {
         listData.updateListing(listing, title: title)
     }
     

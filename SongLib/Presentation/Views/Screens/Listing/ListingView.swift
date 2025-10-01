@@ -9,10 +9,10 @@ import SwiftUI
 
 struct ListingView: View {
     @Environment(\.presentationMode) var presentationMode
-    @StateObject private var viewModel: SongListingViewModel = {
-        DiContainer.shared.resolve(SongListingViewModel.self)
+    @StateObject private var viewModel: ListingViewModel = {
+        DiContainer.shared.resolve(ListingViewModel.self)
     }()
-    let listing: SongListing
+    let listing: Listing
     
     @State private var showToast = false
     @State private var toastMessage: String = ""

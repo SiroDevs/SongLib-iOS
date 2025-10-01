@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ListingContent: View {
-    @ObservedObject var viewModel: SongListingViewModel
+    @ObservedObject var viewModel: ListingViewModel
     let songs: [Song]
     
     var body: some View {

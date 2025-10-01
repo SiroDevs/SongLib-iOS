@@ -7,9 +7,9 @@
 
 import Foundation
 
-extension SongListing {
-    static let sampleListings: [SongListing] = [
-        SongListing(
+extension Listing {
+    static let sampleListings: [Listing] = [
+        Listing(
             id: 1,
             parent: 0,
             title: "Sunday Service",
@@ -18,7 +18,7 @@ extension SongListing {
             modified: Date().addingTimeInterval(-600),
             songCount: 12
         ),
-        SongListing(
+        Listing(
             id: 2,
             parent: 0,
             title: "Wedding Playlist",

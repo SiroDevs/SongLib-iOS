@@ -15,7 +15,7 @@ final class MainViewModel: ObservableObject {
     private let reviewRepo: ReviewReqRepositoryProtocol
     private let subsRepo: SubscriptionRepositoryProtocol
     
-    @Published var activeSubscriber: Bool = false
+    @Published var isProUser: Bool = false
     @Published var horizontalSlides: Bool = false
     @Published var showReviewPrompt: Bool = false
     
@@ -23,7 +23,7 @@ final class MainViewModel: ObservableObject {
     @Published var songs: [Song] = []
     @Published var likes: [Song] = []
     @Published var filtered: [Song] = []
-    @Published var listings: [SongListing] = []
+    @Published var listings: [Listing] = []
     @Published var selectedBook: Int = 0
     @Published var uiState: UiState = .idle
 
@@ -42,9 +42,9 @@ final class MainViewModel: ObservableObject {
     }
     
     func checkSubscription() {
-        subsRepo.isActiveSubscriber { [weak self] isActive in
+        subsRepo.isProUser { [weak self] isActive in
             DispatchQueue.main.async {
-                self?.activeSubscriber = isActive
+                self?.isProUser = isActive
             }
         }
     }
@@ -109,7 +109,7 @@ final class MainViewModel: ObservableObject {
         }
     }
     
-    func saveListItem(_ listing: SongListing, song: Int) {
+    func saveListItem(_ listing: Listing, song: Int) {
         listingRepo.saveListItem(listing, song: song)
         Task { @MainActor in
             listings = listingRepo.fetchListings(for: 0)

@@ -1,5 +1,5 @@
 //
-//  SongListing.swift
+//  Listing.swift
 //  SongLib
 //
 //  Created by Siro Daves on 26/08/2025.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct SongListing: Identifiable, Equatable {
+struct Listing: Identifiable, Equatable {
     let id: Int
     var parent: Int
     var title: String

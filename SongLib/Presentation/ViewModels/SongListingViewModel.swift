@@ -1,5 +1,5 @@
 //
-//  SongViewModel.swift
+//  HistoryModel.swift
 //  SongLib
 //
 //  Created by Siro Daves on 06/05/2025.
@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-final class SongListingViewModel: ObservableObject {
+final class ListingViewModel: ObservableObject {
     private let prefsRepo: PreferencesRepository
     private let songbkRepo: SongBookRepositoryProtocol
     private let listRepo: ListingRepositoryProtocol
@@ -22,11 +22,11 @@ final class SongListingViewModel: ObservableObject {
     
     @Published var songs: [Song] = []
     @Published var listedSongs: [Song] = []
-    @Published var listings: [SongListing] = []
-    @Published var listItems: [SongListing] = []
+    @Published var listings: [Listing] = []
+    @Published var listItems: [Listing] = []
     
     @Published var isLiked: Bool = false
-    @Published var activeSubscriber: Bool = false
+    @Published var isProUser: Bool = false
     @Published var listingTitle: String = "Untitled List"
 
     init(
@@ -42,13 +42,14 @@ final class SongListingViewModel: ObservableObject {
     }
     
     func checkSubscription() {
-        subsRepo.isActiveSubscriber { [weak self] isActive in
+        subsRepo.isProUser { [weak self] isActive in
             DispatchQueue.main.async {
-                self?.activeSubscriber = isActive
+                self?.isProUser = isActive
             }
         }
     }
-    func loadListing(listing: SongListing) {
+    
+    func loadListing(listing: Listing) {
         uiState = .loading("")
         
         Task {
@@ -121,7 +122,7 @@ final class SongListingViewModel: ObservableObject {
         }
     }
     
-    func updateListing(_ parent: SongListing, title: String) {
+    func updateListing(_ parent: Listing, title: String) {
         listRepo.updateListing(parent, title: title)
         listingTitle = title
         Task { @MainActor in
@@ -131,7 +132,7 @@ final class SongListingViewModel: ObservableObject {
         }
     }
     
-    func saveListItem(_ listing: SongListing, song: Int) {
+    func saveListItem(_ listing: Listing, song: Int) {
         listRepo.saveListItem(listing, song: song)
         Task { @MainActor in
             listItems = listRepo.fetchListings(for: listing.id)

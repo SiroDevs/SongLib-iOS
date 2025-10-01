@@ -7,7 +7,7 @@
 
 import CoreData
 
-class SongListingDataManager {
+class ListingDataManager {
     private let cdManager: CoreDataManager
     
     init(cdManager: CoreDataManager = .shared) {
@@ -21,8 +21,8 @@ class SongListingDataManager {
     func saveListing(_ parent: Int, title: String, song: Int) {
         context.perform {
             do {
-                let cdListing = CDSongListing(context: self.context)
-                cdListing.id = self.cdManager.nextId(context: self.context, entity: "CDSongListing")
+                let cdListing = CDListing(context: self.context)
+                cdListing.id = self.cdManager.nextId(context: self.context, entity: "CDListing")
                 cdListing.parent = Int32(parent)
                 cdListing.title = title
                 cdListing.song = Int32(song)
@@ -35,8 +35,8 @@ class SongListingDataManager {
         }
     }
     
-    func fetchListings(with parent: Int = 0) -> [SongListing] {
-        let request: NSFetchRequest<CDSongListing> = CDSongListing.fetchRequest()
+    func fetchListings(with parent: Int = 0) -> [Listing] {
+        let request: NSFetchRequest<CDListing> = CDListing.fetchRequest()
         request.predicate = NSPredicate(format: "parent == %d", parent)
         do {
             let cdListings = try context.fetch(request)
@@ -47,11 +47,11 @@ class SongListingDataManager {
         }
     }
     
-    func updateListing(_ listing: SongListing, title: String) {
+    func updateListing(_ listing: Listing, title: String) {
         context.perform {
             do {
                 guard let cdListing = try self.fetchCDListing(with: listing.id) else {
-                    print("⚠️ SongListing with ID \(listing.id) not found.")
+                    print("⚠️ Listing with ID \(listing.id) not found.")
                     return
                 }
                 cdListing.title = title
@@ -75,9 +75,9 @@ class SongListingDataManager {
         }
     }
     
-    private func mapCDListing(_ cdListing: CDSongListing) -> SongListing? {
+    private func mapCDListing(_ cdListing: CDListing) -> Listing? {
         let songCount = fetchChildCount(for: Int(cdListing.id))
-        return SongListing(
+        return Listing(
             id: Int(cdListing.id),
             parent: Int(cdListing.parent),
             title: cdListing.title ?? "Untitled listing",
@@ -89,13 +89,13 @@ class SongListingDataManager {
     }
     
     private func fetchChildCount(for parent: Int) -> Int {
-        let request: NSFetchRequest<CDSongListing> = CDSongListing.fetchRequest()
+        let request: NSFetchRequest<CDListing> = CDListing.fetchRequest()
         request.predicate = NSPredicate(format: "parent == %d", parent)
         return (try? context.count(for: request)) ?? 0
     }
     
-    private func fetchCDListing(with id: Int) throws -> CDSongListing? {
-        let request: NSFetchRequest<CDSongListing> = CDSongListing.fetchRequest()
+    private func fetchCDListing(with id: Int) throws -> CDListing? {
+        let request: NSFetchRequest<CDListing> = CDListing.fetchRequest()
         request.predicate = NSPredicate(format: "id == %d", id )
         request.fetchLimit = 1
         return try context.fetch(request).first
@@ -110,7 +110,7 @@ class SongListingDataManager {
     }
     
     func deleteAllListings() {
-        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = CDSongListing.fetchRequest()
+        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = CDListing.fetchRequest()
         let batchDeleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
         do {
             try context.execute(batchDeleteRequest)

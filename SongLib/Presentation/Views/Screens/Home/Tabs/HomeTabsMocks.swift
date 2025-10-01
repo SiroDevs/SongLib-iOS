@@ -86,8 +86,8 @@ struct HomeListingsMock: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                ForEach(SongListing.sampleListings.indices, id: \.self) { index in
-                    let listing = SongListing.sampleListings[index]
+                ForEach(Listing.sampleListings.indices, id: \.self) { index in
+                    let listing = Listing.sampleListings[index]
 
                     VStack(spacing: 0) {
                         NavigationLink {
@@ -96,7 +96,7 @@ struct HomeListingsMock: View {
                             ListingItem(listing: listing)
                         }
 
-                        if index < SongListing.sampleListings.count - 1 {
+                        if index < Listing.sampleListings.count - 1 {
                             Divider()
                         }
                     }

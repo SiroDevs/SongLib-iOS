@@ -17,7 +17,7 @@ struct HomeListings: View {
             Group {
                 if viewModel.listings.isEmpty {
                     EmptyState(
-                        message: L10n.emptySongListing,
+                        message: L10n.emptyListing,
                         messageIcon: Image(systemName: "list.number")
                     )
                 } else {
@@ -51,7 +51,7 @@ struct HomeListings: View {
 }
 
 private struct ListingsScrollView: View {
-    let listings: [SongListing]
+    let listings: [Listing]
 
     var body: some View {
         ScrollView {

@@ -43,30 +43,30 @@ class SongUtils {
         byNo: Bool = false
     ) -> [Song] {
         
-        let query = qry.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !query.isEmpty else { return songs }
+        let search = qry.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !search.isEmpty else { return songs }
         
         if byNo {
-            if let number = Int(query) {
+            if let number = Int(search) {
                 return songs.filter { $0.songNo == number }
             } else {
                 return []
             }
         }
         
-        if query.count <= 3, let number = Int(query) {
+        if search.count <= 3, let number = Int(search) {
             return songs.filter { $0.songNo == number }
         }
         
         let charsPattern = try! NSRegularExpression(pattern: "[!,]", options: [])
         
         let words: [String]
-        if query.contains(",") {
-            words = query
+        if search.contains(",") {
+            words = search
                 .split(separator: ",")
                 .map { $0.trimmingCharacters(in: .whitespaces).lowercased() }
         } else {
-            words = [query.lowercased()]
+            words = [search.lowercased()]
         }
         
         let escapedWords = words.map { NSRegularExpression.escapedPattern(for: $0) }

@@ -53,7 +53,7 @@ struct SongsListMock: View {
         }
         .sheet(isPresented: $showListingSheet) {
             ChooseListingSheet(
-                listings: SongListing.sampleListings,
+                listings: Listing.sampleListings,
                 onSelect: { listing in },
                 onNewList: { title in
                     showListingSheet = false

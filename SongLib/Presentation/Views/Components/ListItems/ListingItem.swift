@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct ListingItem: View {
-    let listing: SongListing
+    let listing: Listing
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {

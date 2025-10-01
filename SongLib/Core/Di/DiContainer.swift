@@ -25,9 +25,9 @@ final class DiContainer {
             { self.container.resolve(CoreDataManager.self) },
             { self.container.resolve(BookDataManager.self) },
             { self.container.resolve(SongDataManager.self) },
-            { self.container.resolve(SongListingDataManager.self) },
-            { self.container.resolve(QueryDataManager.self) },
-            { self.container.resolve(SongViewDataManager.self) },
+            { self.container.resolve(ListingDataManager.self) },
+            { self.container.resolve(SearchDataManager.self) },
+            { self.container.resolve(HistoryDataManager.self) },
             { self.container.resolve(PreferencesRepository.self) },
             { self.container.resolve(SongBookRepositoryProtocol.self) },
             { self.container.resolve(ListingRepositoryProtocol.self) },
@@ -36,7 +36,7 @@ final class DiContainer {
             { self.container.resolve(ReviewReqRepositoryProtocol.self) },
             { self.container.resolve(SelectionViewModel.self) },
             { self.container.resolve(MainViewModel.self) },
-            { self.container.resolve(SongListingViewModel.self) },
+            { self.container.resolve(ListingViewModel.self) },
         ]
 
         for resolve in dependencies {
