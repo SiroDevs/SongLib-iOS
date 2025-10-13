@@ -96,6 +96,13 @@ struct DependencyMap {
             )
         }.inObjectScope(.container)
         
+        container.register(SplashViewModel.self) { resolver in
+            SplashViewModel(
+                prefsRepo: resolver.resolve(PreferencesRepository.self)!,
+                subsRepo: resolver.resolve(SubscriptionRepositoryProtocol.self)!,
+            )
+        }.inObjectScope(.container)
+        
         container.register(MainViewModel.self) { resolver in
             MainViewModel(
                 prefsRepo: resolver.resolve(PreferencesRepository.self)!,
