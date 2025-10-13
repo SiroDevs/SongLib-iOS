@@ -22,25 +22,18 @@ struct SongBook: View {
             RoundedRectangle(cornerRadius: 10)
                 .fill(bgColor)
                 .shadow(radius: 5)
-            
-            HStack(spacing: 15) {
-                Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .foregroundColor(txtColor)
-                    .font(.system(size: 24))
-                    .padding(5)
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(SongUtils.refineTitle(txt: book.title))
-                        .font(.system(size: 20, weight: .bold))
-                        .foregroundColor(txtColor)
-
-                    Text("\(book.songs) \(book.subTitle) songs")
-                        .font(.system(size: 18))
-                        .foregroundColor(txtColor)
-                }
-                Spacer()
-            }
-            .padding()
+            (
+                Text(SongUtils.refineTitle(txt: book.title))
+                    .font(.system(size: 20, weight: .bold))
+                +
+                Text(" (\(book.songs))")
+                    .font(.system(size: 14))
+                    .foregroundColor(txtColor.opacity(0.7))
+            )
+            .foregroundColor(txtColor)
+            .lineLimit(3)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(10)
         }
         .frame(maxWidth: .infinity)
         .onTapGesture {
@@ -48,7 +41,6 @@ struct SongBook: View {
         }
     }
 }
-
 
 #Preview {
     SongBook(

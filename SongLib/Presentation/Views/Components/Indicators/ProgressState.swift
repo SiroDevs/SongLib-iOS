@@ -41,7 +41,9 @@ struct ErrorView: View {
             Button("Retry", action: retryAction)
                 .buttonStyle(.borderedProminent)
         }
-        .padding()
+        .padding(20)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .ignoresSafeArea()
     }
 }
 
