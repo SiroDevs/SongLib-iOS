@@ -6,22 +6,31 @@
 //
 
 import SwiftUI
+import RevenueCatUI
 
 struct HomeListings: View {
     @ObservedObject var viewModel: MainViewModel
     @State private var showNewListingAlert = false
+    @State private var showPaywall = false
+    @State private var showProLimit = false
     @State private var newListingTitle = ""
 
     var body: some View {
         NavigationStack {
-            Group {
-                if viewModel.listings.isEmpty {
-                    EmptyState(
-                        message: L10n.emptyListing,
-                        messageIcon: Image(systemName: "list.number")
-                    )
-                } else {
-                    ListingsScrollView(listings: viewModel.listings)
+            VStack {
+                if !viewModel.isProUser && viewModel.listings.count >= 1 {
+                    upgradeBanner
+                }
+                
+                Group {
+                    if viewModel.listings.isEmpty {
+                        EmptyState(
+                            message: L10n.emptyListing,
+                            messageIcon: Image(systemName: "list.number")
+                        )
+                    } else {
+                        ListingsScrollView(listings: viewModel.listings)
+                    }
                 }
             }
             .navigationTitle("Song Listings")
@@ -29,23 +38,71 @@ struct HomeListings: View {
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
-                        showNewListingAlert = true
+                        checkAndHandleNewListing()
                     } label: {
                         Image(systemName: "plus")
                     }
                 }
             }
             .alert("New Listing", isPresented: $showNewListingAlert) {
-                TextField("Listing title", text: $newListingTitle)
-                Button("Add", action: {
-                    guard !newListingTitle.trimmingCharacters(in: .whitespaces).isEmpty else { return }
-                    viewModel.saveListing(0, title: newListingTitle)
-                    newListingTitle = ""
-                })
-                Button("Cancel", role: .cancel) {}
+                newListingAlertContent
             } message: {
                 Text("Enter a title for your new song listing")
             }
+            .alert("Support us by upgrading", isPresented: $showProLimit) {
+                Button("Not Now", role: .cancel) {}
+                Button("Upgrade") {
+                    showPaywall = true
+                }
+            } message: {
+                Text("Please purchase a subscription if you want to continue using this feature and all other Pro features.")
+            }
+            .sheet(isPresented: $showPaywall) {
+            #if !DEBUG
+            PaywallView(displayCloseButton: true)
+            #endif
+            }
+        }
+    }
+    
+    private var upgradeBanner: some View {
+        VStack {
+            HStack {
+                Image(systemName: "crown.fill")
+                    .foregroundColor(.yellow)
+                Text("You are currently limited to only 1 listing")
+                    .font(.caption)
+                Spacer()
+                Button("Upgrade to PRO") {
+                    showPaywall = true
+                }
+                .font(.caption)
+                .buttonStyle(.borderedProminent)
+            }
+            .padding(5)
+            .background(Color.blue.opacity(0.1))
+            .cornerRadius(8)
+            .padding(.horizontal)
+        }
+    }
+    
+    private func checkAndHandleNewListing() {
+        if !viewModel.isProUser && viewModel.listings.count >= 1 {
+            showProLimit = true
+        } else {
+            showNewListingAlert = true
+        }
+    }
+    
+    private var newListingAlertContent: some View {
+        Group {
+            TextField("Listing title", text: $newListingTitle)
+            Button("Add") {
+                guard !newListingTitle.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+                viewModel.saveListing(0, title: newListingTitle)
+                newListingTitle = ""
+            }
+            Button("Cancel", role: .cancel) {}
         }
     }
 }

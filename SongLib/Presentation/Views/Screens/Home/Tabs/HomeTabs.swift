@@ -10,7 +10,6 @@ import RevenueCatUI
 
 struct HomeTabs: View {
     @ObservedObject var viewModel: MainViewModel
-    @Binding var showPaywall: Bool
     
     var body: some View {
         TabView {
@@ -27,13 +26,11 @@ struct HomeTabs: View {
                     }
                     .background(.primaryContainer)
                 
-                if viewModel.isProUser {
-                    HomeListings(viewModel: viewModel)
-                        .tabItem {
-                            Label("Listings", systemImage: "list.number")
-                        }
-                        .background(.primaryContainer)
-                }
+                HomeListings(viewModel: viewModel)
+                    .tabItem {
+                        Label("Listings", systemImage: "list.number")
+                    }
+                    .background(.primaryContainer)
             }
             
             SettingsView(viewModel: viewModel)
@@ -42,16 +39,16 @@ struct HomeTabs: View {
                 }
                 .background(.primaryContainer)
         }
-        .onAppear {
-            #if !DEBUG
-            showPaywall = !viewModel.isProUser
-            viewModel.promptReview()
-            #endif
-        }
-        .sheet(isPresented: $showPaywall) {
-            #if !DEBUG
-            PaywallView(displayCloseButton: true)
-            #endif
-        }
+//        .onAppear {
+//            #if !DEBUG
+//            showPaywall = !viewModel.isProUser
+//            viewModel.promptReview()
+//            #endif
+//        }
+//        .sheet(isPresented: $showPaywall) {
+//            #if !DEBUG
+//            PaywallView(displayCloseButton: true)
+//            #endif
+//        }
     }
 }
