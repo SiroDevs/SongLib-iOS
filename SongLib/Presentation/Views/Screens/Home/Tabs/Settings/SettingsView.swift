@@ -18,7 +18,7 @@ struct SettingsView: View {
     var body: some View {
         Group {
             if restartTheApp {
-                SplashView()
+                SplashView(prefsRepo: PreferencesRepository())
             } else {
                 NavigationStack {
                     SettingsForm(
