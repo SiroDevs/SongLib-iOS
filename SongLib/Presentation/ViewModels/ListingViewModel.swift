@@ -1,5 +1,5 @@
 //
-//  HistoryModel.swift
+//  ListingViewModel.swift
 //  SongLib
 //
 //  Created by Siro Daves on 06/05/2025.
@@ -9,6 +9,7 @@ import Foundation
 import SwiftUI
 
 final class ListingViewModel: ObservableObject {
+    private let netUtils: NetworkUtils
     private let prefsRepo: PreferencesRepository
     private let songbkRepo: SongBookRepositoryProtocol
     private let listRepo: ListingRepositoryProtocol
@@ -30,20 +31,23 @@ final class ListingViewModel: ObservableObject {
     @Published var listingTitle: String = "Untitled List"
 
     init(
+        netUtils: NetworkUtils = .shared,
         prefsRepo: PreferencesRepository,
         songbkRepo: SongBookRepositoryProtocol,
         listRepo: ListingRepositoryProtocol,
         subsRepo: SubscriptionRepositoryProtocol
     ) {
+        self.netUtils = netUtils
         self.prefsRepo = prefsRepo
         self.songbkRepo = songbkRepo
         self.listRepo = listRepo
         self.subsRepo = subsRepo
     }
     
-    func checkSubscription() {
-        subsRepo.isProUser { [weak self] isActive in
-            DispatchQueue.main.async {
+    func checkSubscription() async {
+        let isOnline = await netUtils.checkNetworkAvailability()
+        subsRepo.isProUser(isOnline: isOnline) { [weak self] isActive in
+            Task { @MainActor in
                 self?.isProUser = isActive
             }
         }
@@ -54,7 +58,6 @@ final class ListingViewModel: ObservableObject {
         
         Task {
             await MainActor.run {
-                checkSubscription()
                 listItems = listRepo.fetchListings(for: listing.id)
                 listingTitle = listing.title
                 listedSongs.removeAll()
@@ -65,6 +68,7 @@ final class ListingViewModel: ObservableObject {
                         print("⚠️ Missing song \(item.song)")
                     }
                 }
+                isProUser = prefsRepo.isProUser
                 uiState = .loaded
             }
         }

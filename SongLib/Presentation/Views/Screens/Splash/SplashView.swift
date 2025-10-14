@@ -12,11 +12,6 @@ struct SplashView: View {
         DiContainer.shared.resolve(SplashViewModel.self)
     }()
     @State private var navigateToNextScreen = false
-    private let prefsRepo: PreferencesRepository
-    
-    init(prefsRepo: PreferencesRepository) {
-        self.prefsRepo = prefsRepo
-    }
     
     var body: some View {
         Group {
@@ -25,10 +20,15 @@ struct SplashView: View {
             } else {
                 SplashContent()
                     .onAppear {
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                            navigateToNextScreen = true
-                        }
+                        viewModel.initializeApp()
                     }
+            }
+        }
+        .onReceive(viewModel.$isInitialized) { initialized in
+            if initialized {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    navigateToNextScreen = true
+                }
             }
         }
         .animation(.easeInOut, value: navigateToNextScreen)
@@ -36,10 +36,10 @@ struct SplashView: View {
     
     @ViewBuilder
     private var destinationView: some View {
-        if prefsRepo.isDataLoaded {
+        if viewModel.prefsRepo.isDataLoaded {
             HomeView()
         } else {
-            if prefsRepo.isDataSelected {
+            if viewModel.prefsRepo.isDataSelected {
                 Step2View()
             } else {
                 Step1View()
@@ -47,6 +47,7 @@ struct SplashView: View {
         }
     }
 }
+
 
 struct SplashContent: View {
     var body: some View {

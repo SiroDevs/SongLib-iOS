@@ -10,65 +10,48 @@ import SwiftUI
 import Network
 
 final class SplashViewModel: ObservableObject {
-    private let prefsRepo: PreferencesRepositoryProtocol
+    private let netUtils: NetworkUtils
+    let prefsRepo: PreferencesRepository
     private let subsRepo: SubscriptionRepositoryProtocol
-    private let networkMonitor = NWPathMonitor()
+    
+    @Published var isInitialized = false
 
     init(
-        prefsRepo: PreferencesRepositoryProtocol,
-        subsRepo: SubscriptionRepositoryProtocol
+        netUtils: NetworkUtils = .shared,
+        prefsRepo: PreferencesRepository,
+        subsRepo: SubscriptionRepositoryProtocol,
     ) {
+        self.netUtils = netUtils
         self.prefsRepo = prefsRepo
         self.subsRepo = subsRepo
-        setupNetworkMonitoring()
-    }
-    
-    deinit {
-        networkMonitor.cancel()
     }
     
     func initializeApp() {
         Task { @MainActor in
             do {
-                let isOnline = await checkNetworkAvailability()
-                try await checkSubscriptionAndTime(isOnline: isOnline)
+                let isOnline = await netUtils.checkNetworkAvailability()
+                try await checkSubscription(isOnline: isOnline)
             } catch {
-                //
-            } 
+                print("Subscription check failed: \(error)")
+            }
+            isInitialized = true
         }
     }
     
-    private func setupNetworkMonitoring() {
-        networkMonitor.pathUpdateHandler = { [weak self] path in
-            // Network status changes can be handled here if needed
-        }
-        networkMonitor.start(queue: DispatchQueue.global(qos: .background))
-    }
-    
-    private func checkNetworkAvailability() async -> Bool {
-        return await withCheckedContinuation { continuation in
-            let currentPath = networkMonitor.currentPath
-            continuation.resume(returning: currentPath.status == .satisfied)
-        }
-    }
-    
-    private func checkSubscriptionAndTime(isOnline: Bool) async throws {
-        if !prefsRepo.isProUser && prefsRepo.hasTimeExceeded(hours: 5) {
+    private func checkSubscription(isOnline: Bool) async throws {
+        if !prefsRepo.isProUser || (isOnline) {
             try await verifySubscription(isOnline: isOnline)
         }
-        prefsRepo.updateAppOpenTime()
     }
     
     private func verifySubscription(isOnline: Bool) async throws {
         return try await withCheckedThrowingContinuation { continuation in
-            subsRepo.isProUser { [weak self] isActive in
-                DispatchQueue.main.async {
-//                    self?.isProUser = isActive
-//                    self?.canShowPaywall = !isActive
+            subsRepo.isProUser(isOnline: isOnline) { isActive in
+                Task { @MainActor in
+                    self.prefsRepo.isProUser = isActive
                     continuation.resume()
                 }
             }
         }
     }
-    
 }

@@ -14,23 +14,45 @@ final class SelectionViewModel: ObservableObject {
     @Published var uiState: UiState = .idle
     
     @Published var progress: Int = 0
+    @Published var isProUser: Bool = false
+    @Published var showProLimitAlert = false
 
+    private let netUtils: NetworkUtils
     private let prefsRepo: PreferencesRepository
     private let songbkRepo: SongBookRepositoryProtocol
+    private let subsRepo: SubscriptionRepositoryProtocol
 
     init(
+        netUtils: NetworkUtils = .shared,
         prefsRepo: PreferencesRepository,
-        songbkRepo: SongBookRepositoryProtocol
+        songbkRepo: SongBookRepositoryProtocol,
+        subsRepo: SubscriptionRepositoryProtocol
     ) {
+        self.netUtils = netUtils
         self.prefsRepo = prefsRepo
         self.songbkRepo = songbkRepo
+        self.subsRepo = subsRepo
     }
     
     func toggleSelection(for book: Book) {
         guard let index = books.firstIndex(where: { $0.data.id == book.id }) else { return }
         books[index].isSelected.toggle()
+        
+        checkProLimit()
     }
-
+    
+    private func checkProLimit() {
+        let selectedCount = selectedBooks().count
+        if selectedCount > 3 && !isProUser {
+            showProLimitAlert = true
+        }
+    }
+    
+    func updateProStatus(_ isPro: Bool) {
+        isProUser = isPro
+        showProLimitAlert = false
+    }
+    
     func selectedBooks() -> [Book] {
         books.filter { $0.isSelected }.map { $0.data }
     }
@@ -52,6 +74,7 @@ final class SelectionViewModel: ObservableObject {
                 await MainActor.run {
                     self.books = data
                     self.uiState = .fetched
+                    self.isProUser = prefsRepo.isProUser
                 }
             } catch {
                 await MainActor.run {
@@ -60,7 +83,20 @@ final class SelectionViewModel: ObservableObject {
             }
         }
     }
-
+    
+    func refreshSubscription() async throws {
+        let isOnline = await netUtils.checkNetworkAvailability()
+        return try await withCheckedThrowingContinuation { continuation in
+            subsRepo.isProUser(isOnline: isOnline) { isActive in
+                Task { @MainActor in
+                    self.prefsRepo.isProUser = isActive
+                    self.isProUser = isActive
+                    continuation.resume()
+                }
+            }
+        }
+    }
+    
     func saveBooks() {
         uiState = .saving("Saving books ...")
         print("Selected books: \(selectedBooks())")
@@ -69,8 +105,8 @@ final class SelectionViewModel: ObservableObject {
             self.songbkRepo.saveBooks(selectedBooks())
             
             await MainActor.run {
-                self.prefsRepo.isDataSelected = true
                 self.prefsRepo.selectedBooks = selectedBooksIds()
+                self.prefsRepo.isDataSelected = true
                 self.uiState = .saved
             }
         }

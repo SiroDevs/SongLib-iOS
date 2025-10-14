@@ -22,6 +22,10 @@ struct SongBook: View {
             RoundedRectangle(cornerRadius: 10)
                 .fill(bgColor)
                 .shadow(radius: 5)
+            
+            RoundedRectangle(cornerRadius: 10)
+                .fill(Color.gray.opacity(0.3))
+        
             (
                 Text(SongUtils.refineTitle(txt: book.title))
                     .font(.system(size: 20, weight: .bold))
@@ -41,7 +45,6 @@ struct SongBook: View {
         }
     }
 }
-
 #Preview {
     SongBook(
         book: Book.sampleBooks[0],

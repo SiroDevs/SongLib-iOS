@@ -22,6 +22,7 @@ final class DiContainer {
             { self.container.resolve(AnalyticsServiceProtocol.self) },
             { self.container.resolve(LoggerProtocol.self) },
             { self.container.resolve(ApiServiceProtocol.self) },
+            { self.container.resolve(NetworkUtils.self) },
             { self.container.resolve(CoreDataManager.self) },
             { self.container.resolve(BookDataManager.self) },
             { self.container.resolve(SongDataManager.self) },

@@ -29,6 +29,10 @@ struct DependencyMap {
             Logger()
         }.inObjectScope(.container)
         
+        container.register(NetworkUtils.self) { _ in
+            NetworkUtils.shared
+        }.inObjectScope(.container)
+        
         container.register(BookDataManager.self) { resolver in
             BookDataManager(cdManager: resolver.resolve(CoreDataManager.self)!)
         }.inObjectScope(.container)
@@ -91,13 +95,16 @@ struct DependencyMap {
         
         container.register(SelectionViewModel.self) { resolver in
             SelectionViewModel(
+                netUtils: resolver.resolve(NetworkUtils.self)!,
                 prefsRepo: resolver.resolve(PreferencesRepository.self)!,
                 songbkRepo: resolver.resolve(SongBookRepositoryProtocol.self)!,
+                subsRepo: resolver.resolve(SubscriptionRepositoryProtocol.self)!,
             )
         }.inObjectScope(.container)
         
         container.register(SplashViewModel.self) { resolver in
             SplashViewModel(
+                netUtils: resolver.resolve(NetworkUtils.self)!,
                 prefsRepo: resolver.resolve(PreferencesRepository.self)!,
                 subsRepo: resolver.resolve(SubscriptionRepositoryProtocol.self)!,
             )
