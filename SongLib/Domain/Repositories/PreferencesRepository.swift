@@ -94,13 +94,6 @@ class PreferencesRepository: PreferencesRepositoryProtocol {
         set { userDefaults.set(newValue, forKey: PrefConstants.lastAppOpenTime) }
     }
     
-    func resetPrefs() {
-        selectedBooks = ""
-        isDataSelected = false
-        isDataLoaded = false
-        selectAfresh = false
-    }
-    
     func hasTimeExceeded(hours: Int) -> Bool {
         let lastTime = lastAppOpenTime
         if lastTime == 0 { return false }
@@ -121,4 +114,12 @@ class PreferencesRepository: PreferencesRepositoryProtocol {
         if lastTime == 0 { return 0 }
         return Date().timeIntervalSince1970 - lastTime
     }
+    
+    func resetPrefs() {
+        selectedBooks = ""
+        isDataSelected = false
+        isDataLoaded = false
+        selectAfresh = false
+    }
+    
 }

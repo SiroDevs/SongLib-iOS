@@ -32,12 +32,9 @@ final class SplashViewModel: ObservableObject {
             do {
                 let isOnline = await checkNetworkAvailability()
                 try await checkSubscriptionAndTime(isOnline: isOnline)
-                determineNextRoute()
             } catch {
-                determineNextRoute()
-            } finally {
-                isLoading = false
-            }
+                //
+            } 
         }
     }
     
@@ -56,10 +53,10 @@ final class SplashViewModel: ObservableObject {
     }
     
     private func checkSubscriptionAndTime(isOnline: Bool) async throws {
-        if !isProUser && hasTimeExceeded(hours: 5) {
+        if !prefsRepo.isProUser && prefsRepo.hasTimeExceeded(hours: 5) {
             try await verifySubscription(isOnline: isOnline)
         }
-        updateAppOpenTime()
+        prefsRepo.updateAppOpenTime()
     }
     
     private func verifySubscription(isOnline: Bool) async throws {
