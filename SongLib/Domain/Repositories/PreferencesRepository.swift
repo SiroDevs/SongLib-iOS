@@ -16,8 +16,15 @@ protocol PreferencesRepositoryProtocol {
     var isDataLoaded: Bool { get set }
     var selectedBooks: String { get set }
     var horizontalSlides: Bool { get set }
+    var selectAfresh: Bool { get set }
+    var isProUser: Bool { get set }
+    var canShowPaywall: Bool { get set }
+    var lastAppOpenTime: TimeInterval { get set }
     
     func resetPrefs()
+    func hasTimeExceeded(hours: Int) -> Bool
+    func updateAppOpenTime()
+    func getTimeSinceLastOpen() -> TimeInterval
 }
 
 class PreferencesRepository: PreferencesRepositoryProtocol {
@@ -67,9 +74,52 @@ class PreferencesRepository: PreferencesRepositoryProtocol {
         set { userDefaults.set(newValue, forKey: PrefConstants.horizontalSlides) }
     }
     
+    var selectAfresh: Bool {
+        get { userDefaults.bool(forKey: PrefConstants.selectAfresh) }
+        set { userDefaults.set(newValue, forKey: PrefConstants.selectAfresh) }
+    }
+    
+    var isProUser: Bool {
+        get { userDefaults.bool(forKey: PrefConstants.isProUser) }
+        set { userDefaults.set(newValue, forKey: PrefConstants.isProUser) }
+    }
+    
+    var canShowPaywall: Bool {
+        get { userDefaults.bool(forKey: PrefConstants.canShowPaywall) }
+        set { userDefaults.set(newValue, forKey: PrefConstants.canShowPaywall) }
+    }
+    
+    var lastAppOpenTime: TimeInterval {
+        get { userDefaults.double(forKey: PrefConstants.lastAppOpenTime) }
+        set { userDefaults.set(newValue, forKey: PrefConstants.lastAppOpenTime) }
+    }
+    
+    func hasTimeExceeded(hours: Int) -> Bool {
+        let lastTime = lastAppOpenTime
+        if lastTime == 0 { return false }
+        
+        let currentTime = Date().timeIntervalSince1970
+        let timeDifference = currentTime - lastTime
+        let hoursInSeconds = TimeInterval(hours * 60 * 60)
+        
+        return timeDifference >= hoursInSeconds
+    }
+    
+    func updateAppOpenTime() {
+        lastAppOpenTime = Date().timeIntervalSince1970
+    }
+    
+    func getTimeSinceLastOpen() -> TimeInterval {
+        let lastTime = lastAppOpenTime
+        if lastTime == 0 { return 0 }
+        return Date().timeIntervalSince1970 - lastTime
+    }
+    
     func resetPrefs() {
         selectedBooks = ""
         isDataSelected = false
         isDataLoaded = false
+        selectAfresh = false
     }
+    
 }

@@ -47,15 +47,15 @@ final class SelectionViewModel: ObservableObject {
 
         Task {
             do {
-                let resp: BookResponse = try await songbkRepo.fetchRemoteBooks()
-                let data = resp.data.map { Selectable(data: $0, isSelected: false) }
+                let resp: [Book] = try await songbkRepo.fetchRemoteBooks()
+                let data = resp.map { Selectable(data: $0, isSelected: false) }
                 await MainActor.run {
                     self.books = data
                     self.uiState = .fetched
                 }
             } catch {
                 await MainActor.run {
-                    self.uiState = .error("Failed to fetch books: \(error)")
+                    self.uiState = .error("Failed to fetch books: \(error.localizedDescription)")
                 }
             }
         }
@@ -81,9 +81,9 @@ final class SelectionViewModel: ObservableObject {
 
         Task {
             do {
-                let resp: SongResponse = try await songbkRepo.fetchRemoteSongs(for: prefsRepo.selectedBooks)
+                let resp: [Song] = try await songbkRepo.fetchRemoteSongs(for: prefsRepo.selectedBooks)
                 await MainActor.run {
-                    self.songs = resp.data
+                    self.songs = resp
                     self.uiState = .fetched
                 }
             } catch {
@@ -110,7 +110,7 @@ final class SelectionViewModel: ObservableObject {
             let fetchedSongs = try await songbkRepo.fetchRemoteSongs(for: prefsRepo.selectedBooks)
 
             await MainActor.run {
-                self.songs = fetchedSongs.data
+                self.songs = fetchedSongs
 
                 self.uiState = .saving("Saving songs ...")
                 self.progress = 0

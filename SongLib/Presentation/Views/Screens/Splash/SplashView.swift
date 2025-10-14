@@ -8,6 +8,47 @@
 import SwiftUI
 
 struct SplashView: View {
+    @StateObject private var viewModel: SplashViewModel = {
+        DiContainer.shared.resolve(SplashViewModel.self)
+    }()
+    @State private var navigateToNextScreen = false
+    private let prefsRepo: PreferencesRepository
+    
+    init(prefsRepo: PreferencesRepository) {
+        self.prefsRepo = prefsRepo
+    }
+    
+    var body: some View {
+        Group {
+            if navigateToNextScreen {
+                destinationView
+            } else {
+                SplashContent()
+                    .onAppear {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+                            navigateToNextScreen = true
+                        }
+                    }
+            }
+        }
+        .animation(.easeInOut, value: navigateToNextScreen)
+    }
+    
+    @ViewBuilder
+    private var destinationView: some View {
+        if prefsRepo.isDataLoaded {
+            HomeView()
+        } else {
+            if prefsRepo.isDataSelected {
+                Step2View()
+            } else {
+                Step1View()
+            }
+        }
+    }
+}
+
+struct SplashContent: View {
     var body: some View {
         VStack {
             Spacer()
@@ -65,5 +106,5 @@ struct SplashView: View {
 }
 
 #Preview {
-    SplashView()
+    SplashContent()
 }

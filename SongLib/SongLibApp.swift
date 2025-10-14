@@ -23,12 +23,14 @@ struct SongLibApp: App {
         UINavigationBar.appearance().compactAppearance = appearance
         UINavigationBar.appearance().tintColor = UIColor.label
         
-        Purchases.configure(withAPIKey: AppSecrets.rc_api_key)
+        #if !DEBUG
+            Purchases.configure(withAPIKey: AppSecrets.rc_api_key)
+        #endif
     }
     
     var body: some Scene {
         WindowGroup {
-            ContentView(prefsRepo: PreferencesRepository())
+            SplashView(prefsRepo: PreferencesRepository())
             .environmentObject(themeManager)
             .preferredColorScheme({
                 switch themeManager.selectedTheme {

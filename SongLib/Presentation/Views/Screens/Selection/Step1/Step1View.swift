@@ -97,39 +97,49 @@ struct Step1View: View {
 struct BookSelectionView: View {
     @ObservedObject var viewModel: SelectionViewModel
     @Binding var showAlertDialog: Bool
-
+    
     var body: some View {
-        VStack {
-            ScrollView {
-                LazyVStack(spacing: 12) {
-                    ForEach(viewModel.books.indices, id: \.self) { index in
-                        let selectable = viewModel.books[index]
-                        SongBook(
-                            book: selectable.data,
-                            isSelected: selectable.isSelected
-                        ) {
-                            viewModel.toggleSelection(for: selectable.data)
+        GeometryReader { geometry in
+            VStack {
+                ScrollView {
+                    LazyVGrid(columns: columns(for: geometry.size.width), spacing: 10) {
+                        ForEach(viewModel.books.indices, id: \.self) { index in
+                            let selectable = viewModel.books[index]
+                            SongBook(
+                                book: selectable.data,
+                                isSelected: selectable.isSelected
+                            ) {
+                                viewModel.toggleSelection(for: selectable.data)
+                            }
                         }
                     }
+                    .padding(10)
                 }
-                .padding()
-            }
 
-            Button(action: {
-                 showAlertDialog = true
-            }) {
-                HStack(spacing: 5) {
-                    Image(systemName: "checkmark")
-                    Text("Proceed")
+                Button(action: {
+                     showAlertDialog = true
+                }) {
+                    HStack(spacing: 5) {
+                        Image(systemName: "checkmark")
+                        Text("Proceed")
+                    }
+                    .frame(width: 150)
+                    .padding()
+                    .foregroundColor(.onPrimaryContainer)
+                    .background(.primaryContainer)
+                    .cornerRadius(10)
                 }
-                .frame(width: 150)
-                .padding()
-                .foregroundColor(.onPrimaryContainer)
-                .background(.primaryContainer)
-                .cornerRadius(10)
             }
-            .padding(.bottom)
         }
+    }
+    
+    private func columns(for width: CGFloat) -> [GridItem] {
+        let itemWidth: CGFloat = 160 // Approximate width of each SongBook
+        let spacing: CGFloat = 16
+        let availableWidth = width - 40 // Account for horizontal padding
+        
+        let numberOfColumns = max(2, Int(availableWidth / (itemWidth + spacing)))
+        return Array(repeating: GridItem(.flexible(), spacing: spacing), count: numberOfColumns)
     }
 }
 

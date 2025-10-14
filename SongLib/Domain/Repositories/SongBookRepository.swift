@@ -8,8 +8,8 @@
 import Foundation
 
 protocol SongBookRepositoryProtocol {
-    func fetchRemoteBooks() async throws -> BookResponse
-    func fetchRemoteSongs(for bookId: String) async throws -> SongResponse
+    func fetchRemoteBooks() async throws -> [Book]
+    func fetchRemoteSongs(for bookId: String) async throws -> [Song]
     func fetchLocalBooks() -> [Book]
     func fetchLocalSongs() -> [Song]
     func fetchSong(withId songId: Int) -> Song?
@@ -34,11 +34,11 @@ class SongBookRepository: SongBookRepositoryProtocol {
         self.songData = songData
     }
     
-    func fetchRemoteBooks() async throws -> BookResponse {
+    func fetchRemoteBooks() async throws -> [Book] {
         return try await apiService.fetch(endpoint: .books)
     }
     
-    func fetchRemoteSongs(for booksIds: String) async throws -> SongResponse {
+    func fetchRemoteSongs(for booksIds: String) async throws -> [Song] {
         return try await apiService.fetch(endpoint: .songsByBook(booksIds))
     }
     
