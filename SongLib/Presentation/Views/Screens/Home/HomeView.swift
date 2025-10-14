@@ -14,7 +14,6 @@ struct HomeView: View {
     }()
     
     @State private var showSettings: Bool = false
-    @State private var showPaywall: Bool = false
     @State private var isLandscape = false
         
     var body: some View {
@@ -45,10 +44,7 @@ struct HomeView: View {
                 ProgressView().tint(.onPrimary)
                 
             case .filtered:
-                HomeTabs(
-                    viewModel: viewModel,
-                    showPaywall: $showPaywall
-                )
+                HomeTabs(viewModel: viewModel)
                 
             case .error(let msg):
                 ErrorView(message: msg) {

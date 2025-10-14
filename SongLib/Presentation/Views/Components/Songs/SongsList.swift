@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import RevenueCatUI
 
 struct SongsList: View {
     @ObservedObject var viewModel: MainViewModel
@@ -14,6 +15,8 @@ struct SongsList: View {
     @State private var selectedSong: Song?
     @State private var showToast = false
     @State private var toastMessage: String = ""
+    @State private var showPaywall = false
+    @State private var showProLimit = false
     
     var body: some View {
         ZStack {
@@ -32,13 +35,36 @@ struct SongsList: View {
                     addSongToListing(song: song, listing: listing)
                 },
                 onNewList: { title in
-                    viewModel.saveListing(0, title: title)
-                    if let newListing = viewModel.listings.last {
-                        addSongToListing(song: song, listing: newListing)
+                    // Check if user can create new listing
+                    if canCreateNewListing() {
+                        viewModel.saveListing(0, title: title)
+                        if let newListing = viewModel.listings.last {
+                            addSongToListing(song: song, listing: newListing)
+                        }
+                    } else {
+                        showProLimit = true
                     }
                 }
             )
         }
+        .alert("Support us by upgrading", isPresented: $showProLimit) {
+            Button("Not Now", role: .cancel) {}
+            Button("Upgrade") {
+                showPaywall = true
+            }
+        } message: {
+            Text("Please purchase a subscription if you want to continue using this feature and all other Pro features.")
+        }
+        .sheet(isPresented: $showPaywall) {
+        #if !DEBUG
+        PaywallView(displayCloseButton: true)
+        #endif
+        }
+    }
+    
+    private func canCreateNewListing() -> Bool {
+        // Allow if user is Pro OR has 0 listings
+        return viewModel.isProUser || viewModel.listings.count < 1
     }
     
     func addSongToListing(song: Song, listing: Listing){
@@ -85,7 +111,11 @@ struct SongsList: View {
                 }
                 .swipeActions(edge: .leading, allowsFullSwipe: false) {
                     Button {
-                        selectedSong = song
+                        if viewModel.listings.isEmpty && !canCreateNewListing() {
+                            showProLimit = true
+                        } else {
+                            selectedSong = song
+                        }
                     } label: {
                         Label("Add to Listing", systemImage: "text.badge.plus")
                     }
@@ -102,7 +132,11 @@ struct SongsList: View {
                     }
 
                     Button {
-                        selectedSong = song
+                        if viewModel.listings.isEmpty && !canCreateNewListing() {
+                            showProLimit = true
+                        } else {
+                            selectedSong = song
+                        }
                     } label: {
                         Label("Add to Listing", systemImage: "text.badge.plus")
                     }

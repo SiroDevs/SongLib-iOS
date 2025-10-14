@@ -30,7 +30,7 @@ struct SongLibApp: App {
     
     var body: some Scene {
         WindowGroup {
-            SplashView(prefsRepo: PreferencesRepository())
+            SplashView()
             .environmentObject(themeManager)
             .preferredColorScheme({
                 switch themeManager.selectedTheme {

@@ -18,7 +18,6 @@ protocol PreferencesRepositoryProtocol {
     var horizontalSlides: Bool { get set }
     var selectAfresh: Bool { get set }
     var isProUser: Bool { get set }
-    var canShowPaywall: Bool { get set }
     var lastAppOpenTime: TimeInterval { get set }
     
     func resetPrefs()
@@ -82,11 +81,6 @@ class PreferencesRepository: PreferencesRepositoryProtocol {
     var isProUser: Bool {
         get { userDefaults.bool(forKey: PrefConstants.isProUser) }
         set { userDefaults.set(newValue, forKey: PrefConstants.isProUser) }
-    }
-    
-    var canShowPaywall: Bool {
-        get { userDefaults.bool(forKey: PrefConstants.canShowPaywall) }
-        set { userDefaults.set(newValue, forKey: PrefConstants.canShowPaywall) }
     }
     
     var lastAppOpenTime: TimeInterval {

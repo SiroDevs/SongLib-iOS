@@ -42,11 +42,11 @@ final class MainViewModel: ObservableObject {
     }
     
     func checkSubscription() {
-        subsRepo.isProUser { [weak self] isActive in
-            DispatchQueue.main.async {
-                self?.isProUser = isActive
-            }
-        }
+//        subsRepo.isProUser { [weak self] isActive in
+//            DispatchQueue.main.async {
+//                self?.isProUser = isActive
+//            }
+//        }
     }
     
     func appDidEnterBackground() {
