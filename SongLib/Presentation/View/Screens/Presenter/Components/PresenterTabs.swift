@@ -11,7 +11,7 @@ import SwiftUIPager
 struct PresenterTabs: View {
     let verses: [String]
     @ObservedObject var selected: Page
-    private let prefs = PreferencesRepository()
+    private let prefs = PrefsRepo()
 
     var body: some View {
         ZStack {

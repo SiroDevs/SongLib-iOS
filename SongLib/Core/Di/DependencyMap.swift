@@ -9,8 +9,8 @@ import Swinject
 
 struct DependencyMap {
     static func registerDependencies(in container: Container) {
-        container.register(PreferencesRepository.self) { _ in
-            PreferencesRepository()
+        container.register(PrefsRepo.self) { _ in
+            PrefsRepo()
         }.inObjectScope(.container)
 
         container.register(CoreDataManager.self) { _ in
@@ -62,70 +62,70 @@ struct DependencyMap {
             )
         }.inObjectScope(.container)
         
-        container.register(SongBookRepositoryProtocol.self) { resolver in
-            SongBookRepository(
+        container.register(SongBookRepoProtocol.self) { resolver in
+            SongBookRepo(
                 apiService: resolver.resolve(ApiServiceProtocol.self)!,
                 bookData: resolver.resolve(BookDataManager.self)!,
                 songData: resolver.resolve(SongDataManager.self)!,
             )
         }.inObjectScope(.container)
         
-        container.register(ListingRepositoryProtocol.self) { resolver in
-            ListingRepository(
+        container.register(ListingRepoProtocol.self) { resolver in
+            ListingRepo(
                 listData: resolver.resolve(ListingDataManager.self)!,
             )
         }.inObjectScope(.container)
         
-        container.register(SubscriptionRepositoryProtocol.self) { resolver in
-            SubscriptionRepository()
+        container.register(SubsRepoProtocol.self) { resolver in
+            SubsRepo()
         }.inObjectScope(.container)
         
-        container.register(TrackingRepositoryProtocol.self) { resolver in
-            TrackingRepository(
+        container.register(TrackingRepoProtocol.self) { resolver in
+            TrackingRepo(
                 historyData: resolver.resolve(HistoryDataManager.self)!,
                 searchData: resolver.resolve(SearchDataManager.self)!
             )
         }.inObjectScope(.container)
         
-        container.register(ReviewReqRepositoryProtocol.self) { resolver in
-            ReviewReqRepository(
-                prefsRepo: resolver.resolve(PreferencesRepository.self)!
+        container.register(ReviewReqRepoProtocol.self) { resolver in
+            ReviewReqRepo(
+                prefsRepo: resolver.resolve(PrefsRepo.self)!
             )
         }.inObjectScope(.container)
         
         container.register(SelectionViewModel.self) { resolver in
             SelectionViewModel(
                 netUtils: resolver.resolve(NetworkUtils.self)!,
-                prefsRepo: resolver.resolve(PreferencesRepository.self)!,
-                songbkRepo: resolver.resolve(SongBookRepositoryProtocol.self)!,
-                subsRepo: resolver.resolve(SubscriptionRepositoryProtocol.self)!,
+                prefsRepo: resolver.resolve(PrefsRepo.self)!,
+                songbkRepo: resolver.resolve(SongBookRepoProtocol.self)!,
+                subsRepo: resolver.resolve(SubsRepoProtocol.self)!,
             )
         }.inObjectScope(.container)
         
         container.register(SplashViewModel.self) { resolver in
             SplashViewModel(
                 netUtils: resolver.resolve(NetworkUtils.self)!,
-                prefsRepo: resolver.resolve(PreferencesRepository.self)!,
-                subsRepo: resolver.resolve(SubscriptionRepositoryProtocol.self)!,
+                prefsRepo: resolver.resolve(PrefsRepo.self)!,
+                subsRepo: resolver.resolve(SubsRepoProtocol.self)!,
             )
         }.inObjectScope(.container)
         
         container.register(MainViewModel.self) { resolver in
             MainViewModel(
-                prefsRepo: resolver.resolve(PreferencesRepository.self)!,
-                songbkRepo: resolver.resolve(SongBookRepositoryProtocol.self)!,
-                listingRepo: resolver.resolve(ListingRepositoryProtocol.self)!,
-                reviewRepo: resolver.resolve(ReviewReqRepositoryProtocol.self)!,
-                subsRepo: resolver.resolve(SubscriptionRepositoryProtocol.self)!,
+                prefsRepo: resolver.resolve(PrefsRepo.self)!,
+                songbkRepo: resolver.resolve(SongBookRepoProtocol.self)!,
+                listingRepo: resolver.resolve(ListingRepoProtocol.self)!,
+                reviewRepo: resolver.resolve(ReviewReqRepoProtocol.self)!,
+                subsRepo: resolver.resolve(SubsRepoProtocol.self)!,
             )
         }.inObjectScope(.container)
         
         container.register(ListingViewModel.self) { resolver in
             ListingViewModel(
-                prefsRepo: resolver.resolve(PreferencesRepository.self)!,
-                songbkRepo: resolver.resolve(SongBookRepositoryProtocol.self)!,
-                listRepo: resolver.resolve(ListingRepositoryProtocol.self)!,
-                subsRepo: resolver.resolve(SubscriptionRepositoryProtocol.self)!,
+                prefsRepo: resolver.resolve(PrefsRepo.self)!,
+                songbkRepo: resolver.resolve(SongBookRepoProtocol.self)!,
+                listRepo: resolver.resolve(ListingRepoProtocol.self)!,
+                subsRepo: resolver.resolve(SubsRepoProtocol.self)!,
             )
         }.inObjectScope(.container)
         

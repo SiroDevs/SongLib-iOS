@@ -9,11 +9,11 @@ import Foundation
 import SwiftUI
 
 final class MainViewModel: ObservableObject {
-    private let prefsRepo: PreferencesRepository
-    private let songbkRepo: SongBookRepositoryProtocol
-    private let listingRepo: ListingRepositoryProtocol
-    private let reviewRepo: ReviewReqRepositoryProtocol
-    private let subsRepo: SubscriptionRepositoryProtocol
+    private let prefsRepo: PrefsRepo
+    private let songbkRepo: SongBookRepoProtocol
+    private let listingRepo: ListingRepoProtocol
+    private let reviewRepo: ReviewReqRepoProtocol
+    private let subsRepo: SubsRepoProtocol
     
     @Published var isProUser: Bool = false
     @Published var horizontalSlides: Bool = false
@@ -28,11 +28,11 @@ final class MainViewModel: ObservableObject {
     @Published var uiState: UiState = .idle
 
     init(
-        prefsRepo: PreferencesRepository,
-        songbkRepo: SongBookRepositoryProtocol,
-        listingRepo: ListingRepositoryProtocol,
-        reviewRepo: ReviewReqRepositoryProtocol,
-        subsRepo: SubscriptionRepositoryProtocol
+        prefsRepo: PrefsRepo,
+        songbkRepo: SongBookRepoProtocol,
+        listingRepo: ListingRepoProtocol,
+        reviewRepo: ReviewReqRepoProtocol,
+        subsRepo: SubsRepoProtocol
     ) {
         self.prefsRepo = prefsRepo
         self.songbkRepo = songbkRepo

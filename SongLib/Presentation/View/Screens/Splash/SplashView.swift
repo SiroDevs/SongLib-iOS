@@ -48,7 +48,6 @@ struct SplashView: View {
     }
 }
 
-
 struct SplashContent: View {
     var body: some View {
         VStack {

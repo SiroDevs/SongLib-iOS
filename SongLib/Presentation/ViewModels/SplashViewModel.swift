@@ -11,15 +11,15 @@ import Network
 
 final class SplashViewModel: ObservableObject {
     private let netUtils: NetworkUtils
-    let prefsRepo: PreferencesRepository
-    private let subsRepo: SubscriptionRepositoryProtocol
+    let prefsRepo: PrefsRepo
+    private let subsRepo: SubsRepoProtocol
     
     @Published var isInitialized = false
 
     init(
         netUtils: NetworkUtils = .shared,
-        prefsRepo: PreferencesRepository,
-        subsRepo: SubscriptionRepositoryProtocol,
+        prefsRepo: PrefsRepo,
+        subsRepo: SubsRepoProtocol,
     ) {
         self.netUtils = netUtils
         self.prefsRepo = prefsRepo

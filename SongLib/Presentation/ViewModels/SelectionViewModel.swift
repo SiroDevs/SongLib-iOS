@@ -18,15 +18,15 @@ final class SelectionViewModel: ObservableObject {
     @Published var showProLimitAlert = false
 
     private let netUtils: NetworkUtils
-    private let prefsRepo: PreferencesRepository
-    private let songbkRepo: SongBookRepositoryProtocol
-    private let subsRepo: SubscriptionRepositoryProtocol
+    private let prefsRepo: PrefsRepo
+    private let songbkRepo: SongBookRepoProtocol
+    private let subsRepo: SubsRepoProtocol
 
     init(
         netUtils: NetworkUtils = .shared,
-        prefsRepo: PreferencesRepository,
-        songbkRepo: SongBookRepositoryProtocol,
-        subsRepo: SubscriptionRepositoryProtocol
+        prefsRepo: PrefsRepo,
+        songbkRepo: SongBookRepoProtocol,
+        subsRepo: SubsRepoProtocol
     ) {
         self.netUtils = netUtils
         self.prefsRepo = prefsRepo

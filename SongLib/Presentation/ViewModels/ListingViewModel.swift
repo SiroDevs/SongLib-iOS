@@ -10,10 +10,10 @@ import SwiftUI
 
 final class ListingViewModel: ObservableObject {
     private let netUtils: NetworkUtils
-    private let prefsRepo: PreferencesRepository
-    private let songbkRepo: SongBookRepositoryProtocol
-    private let listRepo: ListingRepositoryProtocol
-    private let subsRepo: SubscriptionRepositoryProtocol
+    private let prefsRepo: PrefsRepo
+    private let songbkRepo: SongBookRepoProtocol
+    private let listRepo: ListingRepoProtocol
+    private let subsRepo: SubsRepoProtocol
 
     @Published var uiState: UiState = .idle
     @Published var title: String = ""
@@ -32,10 +32,10 @@ final class ListingViewModel: ObservableObject {
 
     init(
         netUtils: NetworkUtils = .shared,
-        prefsRepo: PreferencesRepository,
-        songbkRepo: SongBookRepositoryProtocol,
-        listRepo: ListingRepositoryProtocol,
-        subsRepo: SubscriptionRepositoryProtocol
+        prefsRepo: PrefsRepo,
+        songbkRepo: SongBookRepoProtocol,
+        listRepo: ListingRepoProtocol,
+        subsRepo: SubsRepoProtocol
     ) {
         self.netUtils = netUtils
         self.prefsRepo = prefsRepo

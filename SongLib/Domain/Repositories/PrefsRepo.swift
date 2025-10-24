@@ -1,5 +1,5 @@
 //
-//  PreferencesRepository.swift
+//  PrefsRepo.swift
 //  SongLib
 //
 //  Created by Siro Daves on 30/04/2025.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol PreferencesRepositoryProtocol {
+protocol PrefsRepoProtocol {
     var installDate: Date { get set }
     var reviewRequested: Bool { get set }
     var lastReviewPrompt: Date { get set }
@@ -26,7 +26,7 @@ protocol PreferencesRepositoryProtocol {
     func getTimeSinceLastOpen() -> TimeInterval
 }
 
-class PreferencesRepository: PreferencesRepositoryProtocol {
+class PrefsRepo: PrefsRepoProtocol {
     private let userDefaults: UserDefaults
     
     init(userDefaults: UserDefaults = .standard) {
