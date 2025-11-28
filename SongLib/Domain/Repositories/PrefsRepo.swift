@@ -17,7 +17,6 @@ protocol PrefsRepoProtocol {
     var selectedBooks: String { get set }
     var horizontalSlides: Bool { get set }
     var selectAfresh: Bool { get set }
-    var isProUser: Bool { get set }
     var lastAppOpenTime: TimeInterval { get set }
     
     func resetPrefs()
@@ -76,11 +75,6 @@ class PrefsRepo: PrefsRepoProtocol {
     var selectAfresh: Bool {
         get { userDefaults.bool(forKey: PrefConstants.selectAfresh) }
         set { userDefaults.set(newValue, forKey: PrefConstants.selectAfresh) }
-    }
-    
-    var isProUser: Bool {
-        get { userDefaults.bool(forKey: PrefConstants.isProUser) }
-        set { userDefaults.set(newValue, forKey: PrefConstants.isProUser) }
     }
     
     var lastAppOpenTime: TimeInterval {

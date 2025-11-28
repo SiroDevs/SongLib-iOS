@@ -74,7 +74,6 @@ final class SelectionViewModel: ObservableObject {
                 await MainActor.run {
                     self.books = data
                     self.uiState = .fetched
-                    self.isProUser = prefsRepo.isProUser
                 }
             } catch {
                 await MainActor.run {
@@ -89,7 +88,6 @@ final class SelectionViewModel: ObservableObject {
         return try await withCheckedThrowingContinuation { continuation in
             subsRepo.isProUser(isOnline: isOnline) { isActive in
                 Task { @MainActor in
-                    self.prefsRepo.isProUser = isActive
                     self.isProUser = isActive
                     continuation.resume()
                 }

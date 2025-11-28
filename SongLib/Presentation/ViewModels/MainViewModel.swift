@@ -41,12 +41,15 @@ final class MainViewModel: ObservableObject {
         self.subsRepo = subsRepo
     }
     
-    func checkSubscription() {
-//        subsRepo.isProUser { [weak self] isActive in
-//            DispatchQueue.main.async {
-//                self?.isProUser = isActive
-//            }
-//        }
+    private func validateSubscription(isOnline: Bool) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            subsRepo.isProUser(isOnline: isOnline) { isActive in
+                Task { @MainActor in
+                    self.isProUser = isActive
+                    continuation.resume()
+                }
+            }
+        }
     }
     
     func appDidEnterBackground() {
@@ -69,15 +72,13 @@ final class MainViewModel: ObservableObject {
     
     func fetchData() {
         uiState = .loading("")
-        Task {
-            await MainActor.run {
-                horizontalSlides = prefsRepo.horizontalSlides
-                books = songbkRepo.fetchLocalBooks()
-                songs = songbkRepo.fetchLocalSongs()
-                listings = listingRepo.fetchListings(for: 0)
-                checkSubscription()
-                uiState = .fetched
-            }
+        Task { @MainActor in
+            try await validateSubscription(isOnline: false)
+            horizontalSlides = prefsRepo.horizontalSlides
+            books = songbkRepo.fetchLocalBooks()
+            songs = songbkRepo.fetchLocalSongs()
+            listings = listingRepo.fetchListings(for: 0)
+            uiState = .fetched
         }
     }
     

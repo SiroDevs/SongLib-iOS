@@ -30,7 +30,7 @@ final class SplashViewModel: ObservableObject {
         Task { @MainActor in
             do {
                 let isOnline = await netUtils.checkNetworkAvailability()
-                try await checkSubscription(isOnline: isOnline)
+                try await validateSubscription(isOnline: isOnline)
             } catch {
                 print("Subscription check failed: \(error)")
             }
@@ -38,17 +38,10 @@ final class SplashViewModel: ObservableObject {
         }
     }
     
-    private func checkSubscription(isOnline: Bool) async throws {
-        if !prefsRepo.isProUser || (isOnline) {
-            try await verifySubscription(isOnline: isOnline)
-        }
-    }
-    
-    private func verifySubscription(isOnline: Bool) async throws {
+    private func validateSubscription(isOnline: Bool) async throws {
         return try await withCheckedThrowingContinuation { continuation in
             subsRepo.isProUser(isOnline: isOnline) { isActive in
                 Task { @MainActor in
-                    self.prefsRepo.isProUser = isActive
                     continuation.resume()
                 }
             }
