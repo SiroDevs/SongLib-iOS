@@ -14,12 +14,14 @@ enum Endpoint {
     
     var path: String {
         switch self {
-        case .books:
-            return "/books"
-        case .songs:
-            return "/songs"
-        case .songsByBook(let booksIds):
-            return "/songs/books/\(booksIds)"
+            case .books:
+                return "/books"
+                
+            case .songs:
+                return "/songs"
+                
+            case .songsByBook(let booksIds):
+                return "/songs/books/\(booksIds)"
         }
     }
     

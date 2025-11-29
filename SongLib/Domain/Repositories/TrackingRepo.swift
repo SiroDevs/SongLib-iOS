@@ -1,5 +1,5 @@
 //
-//  TrackingRepository.swift
+//  TrackingRepo.swift
 //  SongLib
 //
 //  Created by Siro Daves on 27/08/2025.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol TrackingRepositoryProtocol {
+protocol TrackingRepoProtocol {
     func fetchHistories() -> [History]
     func fetchSearches() -> [Search]
     func saveHistory(_ songId: Int)
@@ -16,7 +16,7 @@ protocol TrackingRepositoryProtocol {
     func deleteSearch()
 }
 
-class TrackingRepository: TrackingRepositoryProtocol {
+class TrackingRepo: TrackingRepoProtocol {
     private let historyData: HistoryDataManager
     private let searchData: SearchDataManager
     

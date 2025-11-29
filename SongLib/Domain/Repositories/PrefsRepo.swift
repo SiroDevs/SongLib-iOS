@@ -1,5 +1,5 @@
 //
-//  PreferencesRepository.swift
+//  PrefsRepo.swift
 //  SongLib
 //
 //  Created by Siro Daves on 30/04/2025.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol PreferencesRepositoryProtocol {
+protocol PrefsRepoProtocol {
     var installDate: Date { get set }
     var reviewRequested: Bool { get set }
     var lastReviewPrompt: Date { get set }
@@ -17,7 +17,6 @@ protocol PreferencesRepositoryProtocol {
     var selectedBooks: String { get set }
     var horizontalSlides: Bool { get set }
     var selectAfresh: Bool { get set }
-    var isProUser: Bool { get set }
     var lastAppOpenTime: TimeInterval { get set }
     
     func resetPrefs()
@@ -26,7 +25,7 @@ protocol PreferencesRepositoryProtocol {
     func getTimeSinceLastOpen() -> TimeInterval
 }
 
-class PreferencesRepository: PreferencesRepositoryProtocol {
+class PrefsRepo: PrefsRepoProtocol {
     private let userDefaults: UserDefaults
     
     init(userDefaults: UserDefaults = .standard) {
@@ -76,11 +75,6 @@ class PreferencesRepository: PreferencesRepositoryProtocol {
     var selectAfresh: Bool {
         get { userDefaults.bool(forKey: PrefConstants.selectAfresh) }
         set { userDefaults.set(newValue, forKey: PrefConstants.selectAfresh) }
-    }
-    
-    var isProUser: Bool {
-        get { userDefaults.bool(forKey: PrefConstants.isProUser) }
-        set { userDefaults.set(newValue, forKey: PrefConstants.isProUser) }
     }
     
     var lastAppOpenTime: TimeInterval {

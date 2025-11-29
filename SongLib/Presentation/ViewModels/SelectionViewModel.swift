@@ -18,15 +18,15 @@ final class SelectionViewModel: ObservableObject {
     @Published var showProLimitAlert = false
 
     private let netUtils: NetworkUtils
-    private let prefsRepo: PreferencesRepository
-    private let songbkRepo: SongBookRepositoryProtocol
-    private let subsRepo: SubscriptionRepositoryProtocol
+    private let prefsRepo: PrefsRepo
+    private let songbkRepo: SongBookRepoProtocol
+    private let subsRepo: SubsRepoProtocol
 
     init(
         netUtils: NetworkUtils = .shared,
-        prefsRepo: PreferencesRepository,
-        songbkRepo: SongBookRepositoryProtocol,
-        subsRepo: SubscriptionRepositoryProtocol
+        prefsRepo: PrefsRepo,
+        songbkRepo: SongBookRepoProtocol,
+        subsRepo: SubsRepoProtocol
     ) {
         self.netUtils = netUtils
         self.prefsRepo = prefsRepo
@@ -74,7 +74,6 @@ final class SelectionViewModel: ObservableObject {
                 await MainActor.run {
                     self.books = data
                     self.uiState = .fetched
-                    self.isProUser = prefsRepo.isProUser
                 }
             } catch {
                 await MainActor.run {
@@ -89,7 +88,6 @@ final class SelectionViewModel: ObservableObject {
         return try await withCheckedThrowingContinuation { continuation in
             subsRepo.isProUser(isOnline: isOnline) { isActive in
                 Task { @MainActor in
-                    self.prefsRepo.isProUser = isActive
                     self.isProUser = isActive
                     continuation.resume()
                 }

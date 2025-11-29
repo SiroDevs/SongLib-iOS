@@ -1,5 +1,5 @@
 //
-//  SongBookRepository.swift
+//  SongBookRepo.swift
 //  SongLib
 //
 //  Created by Siro Daves on 02/05/2025.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol SongBookRepositoryProtocol {
+protocol SongBookRepoProtocol {
     func fetchRemoteBooks() async throws -> [Book]
     func fetchRemoteSongs(for bookId: String) async throws -> [Song]
     func fetchLocalBooks() -> [Book]
@@ -19,7 +19,7 @@ protocol SongBookRepositoryProtocol {
     func deleteLocalData()
 }
 
-class SongBookRepository: SongBookRepositoryProtocol {
+class SongBookRepo: SongBookRepoProtocol {
     private let apiService: ApiServiceProtocol
     private let bookData: BookDataManager
     private let songData: SongDataManager

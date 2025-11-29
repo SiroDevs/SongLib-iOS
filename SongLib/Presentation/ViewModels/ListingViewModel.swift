@@ -10,10 +10,10 @@ import SwiftUI
 
 final class ListingViewModel: ObservableObject {
     private let netUtils: NetworkUtils
-    private let prefsRepo: PreferencesRepository
-    private let songbkRepo: SongBookRepositoryProtocol
-    private let listRepo: ListingRepositoryProtocol
-    private let subsRepo: SubscriptionRepositoryProtocol
+    private let prefsRepo: PrefsRepo
+    private let songbkRepo: SongBookRepoProtocol
+    private let listRepo: ListingRepoProtocol
+    private let subsRepo: SubsRepoProtocol
 
     @Published var uiState: UiState = .idle
     @Published var title: String = ""
@@ -32,10 +32,10 @@ final class ListingViewModel: ObservableObject {
 
     init(
         netUtils: NetworkUtils = .shared,
-        prefsRepo: PreferencesRepository,
-        songbkRepo: SongBookRepositoryProtocol,
-        listRepo: ListingRepositoryProtocol,
-        subsRepo: SubscriptionRepositoryProtocol
+        prefsRepo: PrefsRepo,
+        songbkRepo: SongBookRepoProtocol,
+        listRepo: ListingRepoProtocol,
+        subsRepo: SubsRepoProtocol
     ) {
         self.netUtils = netUtils
         self.prefsRepo = prefsRepo
@@ -44,7 +44,7 @@ final class ListingViewModel: ObservableObject {
         self.subsRepo = subsRepo
     }
     
-    func checkSubscription() async {
+    func validateSubscription() async {
         let isOnline = await netUtils.checkNetworkAvailability()
         subsRepo.isProUser(isOnline: isOnline) { [weak self] isActive in
             Task { @MainActor in
@@ -56,21 +56,19 @@ final class ListingViewModel: ObservableObject {
     func loadListing(listing: Listing) {
         uiState = .loading("")
         
-        Task {
-            await MainActor.run {
-                listItems = listRepo.fetchListings(for: listing.id)
-                listingTitle = listing.title
-                listedSongs.removeAll()
-                for item in listItems {
-                    if let song = songbkRepo.fetchSong(withId: item.song) {
-                        listedSongs.append(song)
-                    } else {
-                        print("⚠️ Missing song \(item.song)")
-                    }
+        Task { @MainActor in
+            await validateSubscription()
+            listItems = listRepo.fetchListings(for: listing.id)
+            listingTitle = listing.title
+            listedSongs.removeAll()
+            for item in listItems {
+                if let song = songbkRepo.fetchSong(withId: item.song) {
+                    listedSongs.append(song)
+                } else {
+                    print("⚠️ Missing song \(item.song)")
                 }
-                isProUser = prefsRepo.isProUser
-                uiState = .loaded
             }
+            uiState = .loaded
         }
     }
 

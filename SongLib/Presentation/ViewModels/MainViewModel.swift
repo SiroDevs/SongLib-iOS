@@ -9,11 +9,11 @@ import Foundation
 import SwiftUI
 
 final class MainViewModel: ObservableObject {
-    private let prefsRepo: PreferencesRepository
-    private let songbkRepo: SongBookRepositoryProtocol
-    private let listingRepo: ListingRepositoryProtocol
-    private let reviewRepo: ReviewReqRepositoryProtocol
-    private let subsRepo: SubscriptionRepositoryProtocol
+    private let prefsRepo: PrefsRepo
+    private let songbkRepo: SongBookRepoProtocol
+    private let listingRepo: ListingRepoProtocol
+    private let reviewRepo: ReviewReqRepoProtocol
+    private let subsRepo: SubsRepoProtocol
     
     @Published var isProUser: Bool = false
     @Published var horizontalSlides: Bool = false
@@ -28,11 +28,11 @@ final class MainViewModel: ObservableObject {
     @Published var uiState: UiState = .idle
 
     init(
-        prefsRepo: PreferencesRepository,
-        songbkRepo: SongBookRepositoryProtocol,
-        listingRepo: ListingRepositoryProtocol,
-        reviewRepo: ReviewReqRepositoryProtocol,
-        subsRepo: SubscriptionRepositoryProtocol
+        prefsRepo: PrefsRepo,
+        songbkRepo: SongBookRepoProtocol,
+        listingRepo: ListingRepoProtocol,
+        reviewRepo: ReviewReqRepoProtocol,
+        subsRepo: SubsRepoProtocol
     ) {
         self.prefsRepo = prefsRepo
         self.songbkRepo = songbkRepo
@@ -41,12 +41,15 @@ final class MainViewModel: ObservableObject {
         self.subsRepo = subsRepo
     }
     
-    func checkSubscription() {
-//        subsRepo.isProUser { [weak self] isActive in
-//            DispatchQueue.main.async {
-//                self?.isProUser = isActive
-//            }
-//        }
+    private func validateSubscription(isOnline: Bool) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            subsRepo.isProUser(isOnline: isOnline) { isActive in
+                Task { @MainActor in
+                    self.isProUser = isActive
+                    continuation.resume()
+                }
+            }
+        }
     }
     
     func appDidEnterBackground() {
@@ -69,15 +72,13 @@ final class MainViewModel: ObservableObject {
     
     func fetchData() {
         uiState = .loading("")
-        Task {
-            await MainActor.run {
-                horizontalSlides = prefsRepo.horizontalSlides
-                books = songbkRepo.fetchLocalBooks()
-                songs = songbkRepo.fetchLocalSongs()
-                listings = listingRepo.fetchListings(for: 0)
-                checkSubscription()
-                uiState = .fetched
-            }
+        Task { @MainActor in
+            try await validateSubscription(isOnline: false)
+            horizontalSlides = prefsRepo.horizontalSlides
+            books = songbkRepo.fetchLocalBooks()
+            songs = songbkRepo.fetchLocalSongs()
+            listings = listingRepo.fetchListings(for: 0)
+            uiState = .fetched
         }
     }
     

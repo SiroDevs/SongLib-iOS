@@ -1,5 +1,5 @@
 //
-//  SubscriptionRepository.swift
+//  SubsRepo.swift
 //  SongLib
 //
 //  Created by Siro Daves on 25/08/2025.
@@ -8,11 +8,11 @@
 import Combine
 import RevenueCat
 
-protocol SubscriptionRepositoryProtocol {
+protocol SubsRepoProtocol {
     func isProUser(isOnline: Bool, completion: @escaping (Bool) -> Void)
 }
 
-final class SubscriptionRepository: SubscriptionRepositoryProtocol {
+final class SubsRepo: SubsRepoProtocol {
     func isProUser(isOnline: Bool, completion: @escaping (Bool) -> Void) {
         #if DEBUG
             completion(true)
@@ -25,8 +25,8 @@ final class SubscriptionRepository: SubscriptionRepositoryProtocol {
                     return
                 }
 
-                let isActive = customerInfo.entitlements[AppConstants.entitlements]?.isActive == true
-                completion(isActive)
+                let isActive = customerInfo.entitlements.active.isEmpty
+                completion(!isActive)
             }
         #endif
     }

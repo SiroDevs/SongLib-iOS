@@ -1,5 +1,5 @@
 //
-//  ListingRepository.swift
+//  ListingRepo.swift
 //  SongLib
 //
 //  Created by Siro Daves on 27/08/2025.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol ListingRepositoryProtocol {
+protocol ListingRepoProtocol {
     func fetchListings(for parent: Int) -> [Listing]
     func saveListing(_ parent: Int, title: String)
     func saveListItem(_ parent: Listing, song: Int)
@@ -16,7 +16,7 @@ protocol ListingRepositoryProtocol {
     func deleteListings()
 }
 
-class ListingRepository: ListingRepositoryProtocol {
+class ListingRepo: ListingRepoProtocol {
     private let listData: ListingDataManager
     
     init(listData: ListingDataManager) {

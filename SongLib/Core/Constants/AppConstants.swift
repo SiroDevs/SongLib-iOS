@@ -25,9 +25,9 @@ struct PrefConstants {
     static let isLoaded = "dataIsLoadedKey"
     static let selectedBooks = "selectedBooksKey"
     static let horizontalSlides = "horizontalSlidesKey"
-    static let isProUser = "isProUser"
-    static let selectAfresh = "selectAfresh"
-    static let lastAppOpenTime = "lastAppOpenTime"
+    static let isProUser = "isProUserKey"
+    static let selectAfresh = "selectAfreshKey"
+    static let lastAppOpenTime = "lastAppOpenTimeKey"
 }
 
 struct AppSecrets {
