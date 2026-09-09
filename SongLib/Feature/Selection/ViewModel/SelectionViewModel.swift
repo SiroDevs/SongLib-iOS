@@ -43,7 +43,7 @@ final class SelectionViewModel: ObservableObject {
     
     private func checkProLimit() {
         let selectedCount = selectedBooks().count
-        if selectedCount > 3 && !isProUser {
+        if selectedCount > 4 && !isProUser {
             showProLimitAlert = true
         }
     }
@@ -70,7 +70,22 @@ final class SelectionViewModel: ObservableObject {
         Task {
             do {
                 let resp: [Book] = try await songbkRepo.fetchRemoteBooks()
-                let data = resp.map { Selectable(data: $0, isSelected: false) }
+                let alreadySelectedIds = Set(
+                    prefsRepo.selectedBooks
+                        .split(separator: ",")
+                        .compactMap { Int($0.trimmingCharacters(in: .whitespaces)) }
+                )
+
+                var data = resp.map { Selectable(data: $0, isSelected: alreadySelectedIds.contains($0.bookId)) }
+
+                // No prior selection at all (fresh install) — default to the
+                // first 2 books so the picker isn't empty out of the gate.
+                if alreadySelectedIds.isEmpty {
+                    for index in data.indices where index < 2 {
+                        data[index].isSelected = true
+                    }
+                }
+
                 await MainActor.run {
                     self.books = data
                     self.uiState = .fetched

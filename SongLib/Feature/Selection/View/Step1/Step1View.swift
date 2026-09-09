@@ -12,8 +12,11 @@ struct Step1View: View {
     @StateObject private var viewModel: SelectionViewModel = {
         DiContainer.shared.resolve(SelectionViewModel.self)
     }()
+    @EnvironmentObject var themeManager: ThemeManager
+
     @State private var showAlertDialog = false
     @State private var showPaywall: Bool = false
+    @State private var showThemeSheet: Bool = false
     @State private var navigateToNextScreen = false
 
     var body: some View {
@@ -24,22 +27,22 @@ struct Step1View: View {
                 AnyView(mainContent)
             }
         }
-        .alert("You selected more than 3 ...",
+        .alert("You selected more than 4 ...",
                isPresented: $viewModel.showProLimitAlert) {
             proLimitAlertButtons
         } message: {
-            Text("Please purchase a subscription if you want to have more than 3 songbooks collection.")
+            Text("Please purchase a subscription if you want to have more than 4 songbooks collection.")
         }
     }
-    
+
     private var mainContent: some View {
-        VStack {
-            Text("Select Songbooks")
-                .font(.title2)
-                .foregroundColor(.onPrimaryContainer)
-            stateContent.background(.surface)
+        NavigationStack {
+            stateContent
+                .background(.surface)
+                .navigationTitle("Select Songbooks")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar { toolbarContent }
         }
-        .background(.primaryContainer)
         .alert(isPresented: $showAlertDialog) {
             selectionAlert
         }
@@ -50,8 +53,38 @@ struct Step1View: View {
             PaywallView(displayCloseButton: true)
             #endif
         }
+        .sheet(isPresented: $showThemeSheet) {
+            ThemeSelectorSheet()
+                .environmentObject(themeManager)
+        }
     }
-    
+
+    @ToolbarContentBuilder
+    private var toolbarContent: some ToolbarContent {
+        ToolbarItemGroup(placement: .navigationBarTrailing) {
+            if !isBusy {
+                Button {
+                    viewModel.fetchBooks()
+                } label: {
+                    Image(systemName: "arrow.clockwise")
+                }
+            }
+
+            Button {
+                showThemeSheet = true
+            } label: {
+                Image(systemName: "circle.lefthalf.filled")
+            }
+        }
+    }
+
+    private var isBusy: Bool {
+        switch viewModel.uiState {
+            case .loading, .saving: return true
+            default: return false
+        }
+    }
+
     private var proLimitAlertButtons: some View {
         Group {
             Button("CANCEL", role: .cancel) {
@@ -62,36 +95,30 @@ struct Step1View: View {
             }
         }
     }
-    
+
     private func deselectLastBook() {
         if let lastSelectedIndex = viewModel.books.lastIndex(where: { $0.isSelected }) {
             viewModel.books[lastSelectedIndex].isSelected = false
         }
     }
-    
+
     @ViewBuilder
     private var stateContent: some View {
         switch viewModel.uiState {
-            case .loading(let msg):
-                LoadingState(
-                    title: msg ?? "Loading books ...",
-                    fileName: "loading-hand"
-                )
-                
-            case .saving(let msg):
-                LoadingState(
-                    title: msg ?? "Loading books ...",
-                    fileName: "cloud-download"
-                )
-                
+            case .loading:
+                SelectionSkeleton()
+
+            case .saving:
+                SplashContent()
+
             case .saved:
                 LoadingView()
-                
+
             case .error(let msg):
                 ErrorView(message: msg) {
                     Task { viewModel.fetchBooks() }
                 }
-                
+
             default:
                 Step1Content(
                     viewModel: viewModel,
@@ -99,7 +126,7 @@ struct Step1View: View {
                 )
         }
     }
-    
+
     private var selectionAlert: Alert {
         if viewModel.selectedBooks().isEmpty {
             Alert(
@@ -108,10 +135,10 @@ struct Step1View: View {
                 dismissButton: .default(Text("OKAY")),
             )
         } else {
-            if !viewModel.isProUser && viewModel.selectedBooks().count > 3 {
+            if !viewModel.isProUser && viewModel.selectedBooks().count > 4 {
                 Alert(
-                    title: Text("You selected more than 3 ..."),
-                    message: Text("Please purchase a subscription if you want to have more than 3 songbooks in your collection."),
+                    title: Text("You selected more than 4 ..."),
+                    message: Text("Please purchase a subscription if you want to have more than 4 songbooks in your collection."),
                     primaryButton: .default(Text("CANCEL")) {
                         deselectLastBook()
                     },
@@ -131,7 +158,7 @@ struct Step1View: View {
             }
         }
     }
-    
+
     private func handleStateChange(_ state: UiState) {
         navigateToNextScreen = .saved == state
     }

@@ -7,6 +7,9 @@
 
 import Foundation
 
+/// A user-authored song draft. Local-only — there is no account system on
+/// iOS, so drafts never leave the device (mirrors Android's DraftRepo
+/// behavior before a user logs in).
 struct Draft: Identifiable, Equatable {
     let id: Int
     var title: String
