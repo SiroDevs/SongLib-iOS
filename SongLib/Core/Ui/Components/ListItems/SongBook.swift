@@ -41,7 +41,7 @@ struct SongBook: View {
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
 
-                    SongCountChip(count: book.songs, isSelected: isSelected, textColor: onContainerColor)
+                    SongCountChip(count: book.songs, slug: book.subTitle, isSelected: isSelected, textColor: onContainerColor)
                 }
                 Spacer(minLength: 0)
             }
@@ -64,11 +64,12 @@ struct SongBook: View {
 
 private struct SongCountChip: View {
     let count: Int
+    let slug: String
     let isSelected: Bool
     let textColor: Color
 
     var body: some View {
-        Text("\(count) Songs")
+        Text("\(count) \(slug) songs")
             .font(.system(size: 12, weight: .medium))
             .foregroundColor(isSelected ? textColor : .primary1)
             .padding(.horizontal, 10)

@@ -7,8 +7,6 @@
 
 import SwiftUI
 
-/// Shimmering placeholder grid shown while books are loading — mirrors
-/// Android's SelectionSkeleton/SongBookSkeleton composables.
 struct SelectionSkeleton: View {
     var body: some View {
         GeometryReader { geometry in

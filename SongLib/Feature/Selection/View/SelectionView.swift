@@ -1,37 +1,50 @@
 //
-//  Step1View.swift
+//  SelectionView.swift
 //  SongLib
 //
-//  Created by Siro Daves on 30/04/2025.
+//  Created by Siro Daves on 04/09/2026.
 //
 
 import SwiftUI
 import RevenueCatUI
 
-struct Step1View: View {
+enum SelectionPhase {
+    case books
+    case songs
+}
+
+struct SelectionView: View {
     @StateObject private var viewModel: SelectionViewModel = {
         DiContainer.shared.resolve(SelectionViewModel.self)
     }()
     @EnvironmentObject var themeManager: ThemeManager
 
+    let startPhase: SelectionPhase
+
+    @State private var phase: SelectionPhase
     @State private var showAlertDialog = false
-    @State private var showPaywall: Bool = false
-    @State private var showThemeSheet: Bool = false
-    @State private var navigateToNextScreen = false
+    @State private var showPaywall = false
+    @State private var showThemeSheet = false
+    @State private var navigateToHome = false
+
+    init(startPhase: SelectionPhase = .books) {
+        self.startPhase = startPhase
+        self._phase = State(initialValue: startPhase)
+    }
 
     var body: some View {
         Group {
-            if navigateToNextScreen {
-                AnyView(Step2View())
+            if navigateToHome {
+                HomeView()
             } else {
-                AnyView(mainContent)
+                mainContent
             }
         }
         .alert("You selected more than 4 ...",
                isPresented: $viewModel.showProLimitAlert) {
             proLimitAlertButtons
         } message: {
-            Text("Please purchase a subscription if you want to have more than 4 songbooks collection.")
+            Text("Please purchase a subscription if you want to have more than 4 songbooks your collection.")
         }
     }
 
@@ -39,14 +52,14 @@ struct Step1View: View {
         NavigationStack {
             stateContent
                 .background(.surface)
-                .navigationTitle("Select Songbooks")
+                .navigationTitle(phase == .books ? "Select Songbooks" : "Syncing Songs")
                 .navigationBarTitleDisplayMode(.inline)
-                .toolbar { toolbarContent }
+                .toolbar { if phase == .books { toolbarContent } }
         }
         .alert(isPresented: $showAlertDialog) {
             selectionAlert
         }
-        .task({ viewModel.fetchBooks() })
+        .task { startFlow() }
         .onChange(of: viewModel.uiState, perform: handleStateChange)
         .sheet(isPresented: $showPaywall) {
             #if !DEBUG
@@ -56,6 +69,15 @@ struct Step1View: View {
         .sheet(isPresented: $showThemeSheet) {
             ThemeSelectorSheet()
                 .environmentObject(themeManager)
+        }
+    }
+
+    private func startFlow() {
+        switch startPhase {
+            case .books:
+                viewModel.fetchBooks()
+            case .songs:
+                viewModel.initializeSongSync()
         }
     }
 
@@ -104,6 +126,16 @@ struct Step1View: View {
 
     @ViewBuilder
     private var stateContent: some View {
+        switch phase {
+            case .books:
+                booksPhaseContent
+            case .songs:
+                SongSyncContent(viewModel: viewModel, onRetry: { viewModel.initializeSongSync() })
+        }
+    }
+
+    @ViewBuilder
+    private var booksPhaseContent: some View {
         switch viewModel.uiState {
             case .loading:
                 SelectionSkeleton()
@@ -111,16 +143,13 @@ struct Step1View: View {
             case .saving:
                 SplashContent()
 
-            case .saved:
-                LoadingView()
-
             case .error(let msg):
                 ErrorView(message: msg) {
                     Task { viewModel.fetchBooks() }
                 }
 
             default:
-                Step1Content(
+                BooksGridContent(
                     viewModel: viewModel,
                     showAlertDialog: $showAlertDialog
                 )
@@ -131,7 +160,7 @@ struct Step1View: View {
         if viewModel.selectedBooks().isEmpty {
             Alert(
                 title: Text("Oops! No selection found"),
-                message: Text("Please select at least 1 songbook to proceed to the next step."),
+                message: Text("Please select at least 1 songbook to proceed."),
                 dismissButton: .default(Text("OKAY")),
             )
         } else {
@@ -143,12 +172,12 @@ struct Step1View: View {
                         deselectLastBook()
                     },
                     secondaryButton: .default(Text("OKAY")) {
-                        showPaywall = true
+                        viewModel.saveBooks()
                     }
                 )
             } else {
                 Alert(
-                    title: Text("Are you done selecting?"),
+                    title: Text("Done selecting?"),
                     message: Text("If you are done selecting please proceed ahead. We can always bring you back here to reselect afresh."),
                     primaryButton: .default(Text("CANCEL")),
                     secondaryButton: .default(Text("OKAY")) {
@@ -158,8 +187,20 @@ struct Step1View: View {
             }
         }
     }
-
+    
     private func handleStateChange(_ state: UiState) {
-        navigateToNextScreen = .saved == state
+        guard case .saved = state else { return }
+
+        switch phase {
+            case .books:
+                phase = .songs
+                viewModel.initializeSongSync()
+            case .songs:
+                navigateToHome = true
+        }
     }
+}
+
+#Preview {
+    SelectionView()
 }

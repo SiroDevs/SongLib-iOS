@@ -39,11 +39,7 @@ struct SplashView: View {
         if viewModel.prefsRepo.isDataLoaded {
             HomeView()
         } else {
-            if viewModel.prefsRepo.isDataSelected {
-                Step2View()
-            } else {
-                Step1View()
-            }
+            SelectionView(startPhase: viewModel.prefsRepo.isDataSelected ? .songs : .books)
         }
     }
 }

@@ -1,5 +1,5 @@
 //
-//  Step1Content.swift
+//  BooksGridContent.swift
 //  SongLib
 //
 //  Created by Siro Daves on 14/10/2025.
@@ -7,7 +7,9 @@
 
 import SwiftUI
 
-struct Step1Content: View {
+/// The book-selection grid + floating "Proceed" action.
+/// Used by SelectionView while it's in the `.books` phase.
+struct BooksGridContent: View {
     @ObservedObject var viewModel: SelectionViewModel
     @Binding var showAlertDialog: Bool
 
@@ -58,8 +60,4 @@ struct Step1Content: View {
         let numberOfColumns = max(2, Int(availableWidth / (itemWidth + spacing)))
         return Array(repeating: GridItem(.flexible(), spacing: spacing), count: numberOfColumns)
     }
-}
-
-#Preview {
-    Step1View()
 }

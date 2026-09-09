@@ -1,5 +1,5 @@
 //
-//  Step1ViewModel.swift
+//  SelectionViewModel.swift
 //  SongLib
 //
 //  Created by Siro Daves on 30/04/2025.
@@ -143,7 +143,7 @@ final class SelectionViewModel: ObservableObject {
         }
     }
 
-    func initializeStep2() {
+    func initializeSongSync() {
         Task {
             await fetchAndSaveSongs()
         }
