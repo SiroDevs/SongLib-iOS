@@ -62,6 +62,12 @@ struct DependencyMap {
             )
         }.inObjectScope(.container)
         
+        container.register(DraftDataManager.self) { resolver in
+            DraftDataManager(
+                cdManager: resolver.resolve(CoreDataManager.self)!,
+            )
+        }.inObjectScope(.container)
+        
         container.register(SongBookRepoProtocol.self) { resolver in
             SongBookRepo(
                 apiService: resolver.resolve(ApiServiceProtocol.self)!,
@@ -92,6 +98,25 @@ struct DependencyMap {
                 prefsRepo: resolver.resolve(PrefsRepo.self)!
             )
         }.inObjectScope(.container)
+        
+        container.register(DraftRepoProtocol.self) { resolver in
+            DraftRepo(
+                draftData: resolver.resolve(DraftDataManager.self)!
+            )
+        }.inObjectScope(.container)
+        
+        container.register(DraftsViewModel.self) { resolver in
+            DraftsViewModel(
+                draftRepo: resolver.resolve(DraftRepoProtocol.self)!
+            )
+        }.inObjectScope(.container)
+        
+        container.register(DraftEditorViewModel.self) { (resolver, draft: Draft?) in
+            DraftEditorViewModel(
+                draftRepo: resolver.resolve(DraftRepoProtocol.self)!,
+                draft: draft
+            )
+        }
         
         container.register(SelectionViewModel.self) { resolver in
             SelectionViewModel(

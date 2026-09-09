@@ -39,7 +39,21 @@ class SongBookRepo: SongBookRepoProtocol {
     }
     
     func fetchRemoteSongs(for booksIds: String) async throws -> [Song] {
-        return try await apiService.fetch(endpoint: .songsByBook(booksIds))
+        var allSongs: [Song] = []
+        var page = 1
+        let limit = 500
+
+        while true {
+            let response: PagedSongsResponse = try await apiService.fetch(
+                endpoint: .songsByBook(booksIds: booksIds, page: page, limit: limit)
+            )
+            allSongs.append(contentsOf: response.data)
+
+            guard response.pagination.hasMore else { break }
+            page += 1
+        }
+
+        return allSongs
     }
     
     func fetchLocalBooks() -> [Book] {

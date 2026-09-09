@@ -33,6 +33,12 @@ struct HomeTabs: View {
                     .background(.primaryContainer)
             }
             
+            DraftsScreen()
+                .tabItem {
+                    Label("Drafts", systemImage: "doc.text")
+                }
+                .background(.primaryContainer)
+            
             SettingsView(viewModel: viewModel)
                 .tabItem {
                     Label("Settings", systemImage: "gear")
