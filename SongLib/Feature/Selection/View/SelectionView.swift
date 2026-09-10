@@ -8,29 +8,16 @@
 import SwiftUI
 import RevenueCatUI
 
-enum SelectionPhase {
-    case books
-    case songs
-}
-
 struct SelectionView: View {
     @StateObject private var viewModel: SelectionViewModel = {
         DiContainer.shared.resolve(SelectionViewModel.self)
     }()
     @EnvironmentObject var themeManager: ThemeManager
 
-    let startPhase: SelectionPhase
-
-    @State private var phase: SelectionPhase
     @State private var showAlertDialog = false
     @State private var showPaywall = false
     @State private var showThemeSheet = false
     @State private var navigateToHome = false
-
-    init(startPhase: SelectionPhase = .books) {
-        self.startPhase = startPhase
-        self._phase = State(initialValue: startPhase)
-    }
 
     var body: some View {
         Group {
@@ -52,14 +39,14 @@ struct SelectionView: View {
         NavigationStack {
             stateContent
                 .background(.surface)
-                .navigationTitle(phase == .books ? "Select Songbooks" : "Syncing Songs")
+                .navigationTitle("Select Songbooks")
                 .navigationBarTitleDisplayMode(.inline)
-                .toolbar { if phase == .books { toolbarContent } }
+                .toolbar { toolbarContent }
         }
         .alert(isPresented: $showAlertDialog) {
             selectionAlert
         }
-        .task { startFlow() }
+        .task { viewModel.fetchBooks() }
         .onChange(of: viewModel.uiState, perform: handleStateChange)
         .sheet(isPresented: $showPaywall) {
             #if !DEBUG
@@ -69,15 +56,6 @@ struct SelectionView: View {
         .sheet(isPresented: $showThemeSheet) {
             ThemeSelectorSheet()
                 .environmentObject(themeManager)
-        }
-    }
-
-    private func startFlow() {
-        switch startPhase {
-            case .books:
-                viewModel.fetchBooks()
-            case .songs:
-                viewModel.initializeSongSync()
         }
     }
 
@@ -102,7 +80,7 @@ struct SelectionView: View {
 
     private var isBusy: Bool {
         switch viewModel.uiState {
-            case .loading, .saving: return true
+            case .loading: return true
             default: return false
         }
     }
@@ -126,22 +104,9 @@ struct SelectionView: View {
 
     @ViewBuilder
     private var stateContent: some View {
-        switch phase {
-            case .books:
-                booksPhaseContent
-            case .songs:
-                SongSyncContent(viewModel: viewModel, onRetry: { viewModel.initializeSongSync() })
-        }
-    }
-
-    @ViewBuilder
-    private var booksPhaseContent: some View {
         switch viewModel.uiState {
             case .loading:
                 SelectionSkeleton()
-
-            case .saving:
-                SplashContent()
 
             case .error(let msg):
                 ErrorView(message: msg) {
@@ -149,6 +114,10 @@ struct SelectionView: View {
                 }
 
             default:
+                // No dedicated "saving" screen — matches Android, which
+                // just flips straight to Home once the selection is
+                // persisted. The book grid stays put underneath the alert
+                // for the brief moment saveBooks() is writing locally.
                 BooksGridContent(
                     viewModel: viewModel,
                     showAlertDialog: $showAlertDialog
@@ -172,7 +141,7 @@ struct SelectionView: View {
                         deselectLastBook()
                     },
                     secondaryButton: .default(Text("OKAY")) {
-                        viewModel.saveBooks()
+                        showPaywall = true
                     }
                 )
             } else {
@@ -187,17 +156,17 @@ struct SelectionView: View {
             }
         }
     }
-    
-    private func handleStateChange(_ state: UiState) {
-        guard case .saved = state else { return }
 
-        switch phase {
-            case .books:
-                phase = .songs
-                viewModel.initializeSongSync()
-            case .songs:
-                navigateToHome = true
-        }
+    /// Books are persisted locally (fast, no network) — as soon as that's
+    /// done we go straight to Home, same as Android. Song syncing itself
+    /// happens silently afterward, kicked off here but never observed by
+    /// this view again (HomeView/MainViewModel picks it up independently
+    /// too, so this just gets it started immediately rather than waiting
+    /// for Home's own .task to notice isDataLoaded is false).
+    private func handleStateChange(_ state: UiState) {
+        guard !navigateToHome, case .saved = state else { return }
+        navigateToHome = true
+        viewModel.syncSongsInBackground()
     }
 }
 

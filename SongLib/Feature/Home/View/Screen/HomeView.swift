@@ -36,23 +36,14 @@ struct HomeView: View {
     
     @ViewBuilder
     private var iPhoneLayout: some View {
-        switch viewModel.uiState {
-            case .loading(let msg):
-                LoadingState(title: msg ?? "")
-                
-            case .filtering:
-                ProgressView().tint(.onPrimary)
-                
-            case .filtered:
-                HomeTabs(viewModel: viewModel)
-                
-            case .error(let msg):
-                ErrorView(message: msg) {
-                    Task { viewModel.fetchData() }
-                }
-                
-            default:
-                LoadingState()
+        if case .error(let msg) = viewModel.uiState {
+            ErrorView(message: msg) {
+                Task { viewModel.fetchData() }
+            }
+        } else if !viewModel.isDatabaseReady {
+            HomeSkeleton()
+        } else {
+            HomeTabs(viewModel: viewModel)
         }
     }
     

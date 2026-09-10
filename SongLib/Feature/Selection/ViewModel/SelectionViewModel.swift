@@ -78,8 +78,6 @@ final class SelectionViewModel: ObservableObject {
 
                 var data = resp.map { Selectable(data: $0, isSelected: alreadySelectedIds.contains($0.bookId)) }
 
-                // No prior selection at all (fresh install) — default to the
-                // first 2 books so the picker isn't empty out of the gate.
                 if alreadySelectedIds.isEmpty {
                     for index in data.indices where index < 2 {
                         data[index].isSelected = true
@@ -143,7 +141,12 @@ final class SelectionViewModel: ObservableObject {
         }
     }
 
-    func initializeSongSync() {
+    /// Fire-and-forget: fetches + saves songs for the selected books.
+    /// Never observed by a dedicated screen — SelectionView starts this
+    /// right as it navigates to Home, and HomeView/MainViewModel triggers
+    /// it too if it notices isDataLoaded is still false. Whichever runs
+    /// first wins; the user never sees a loading/saving state for it.
+    func syncSongsInBackground() {
         Task {
             await fetchAndSaveSongs()
         }

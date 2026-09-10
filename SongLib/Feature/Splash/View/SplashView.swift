@@ -36,10 +36,14 @@ struct SplashView: View {
     
     @ViewBuilder
     private var destinationView: some View {
-        if viewModel.prefsRepo.isDataLoaded {
-            HomeView()
+        if !viewModel.prefsRepo.isDataSelected || viewModel.prefsRepo.selectAfresh {
+            SelectionView()
         } else {
-            SelectionView(startPhase: viewModel.prefsRepo.isDataSelected ? .songs : .books)
+            // Books are chosen — go straight to Home even if songs haven't
+            // finished syncing yet. HomeView triggers that sync itself in
+            // the background (mirrors Android's WorkManager-scheduled sync
+            // instead of a dedicated blocking screen).
+            HomeView()
         }
     }
 }

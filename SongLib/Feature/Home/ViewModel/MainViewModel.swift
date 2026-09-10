@@ -18,6 +18,7 @@ final class MainViewModel: ObservableObject {
     @Published var isProUser: Bool = false
     @Published var horizontalSlides: Bool = false
     @Published var showReviewPrompt: Bool = false
+    @Published var isDatabaseReady: Bool = false
     
     @Published var books: [Book] = []
     @Published var songs: [Song] = []
@@ -72,6 +73,10 @@ final class MainViewModel: ObservableObject {
     
     func fetchData() {
         uiState = .loading("")
+        // Reset readiness on every fetch so a re-fetch (e.g. after an error,
+        // or "Clear Data") goes back through the skeleton instead of
+        // flashing the previous, now-stale, full UI.
+        isDatabaseReady = prefsRepo.isDataLoaded
         Task { @MainActor in
             try await validateSubscription(isOnline: false)
             horizontalSlides = prefsRepo.horizontalSlides
@@ -79,6 +84,43 @@ final class MainViewModel: ObservableObject {
             songs = songbkRepo.fetchLocalSongs()
             listings = listingRepo.fetchListings(for: 0)
             uiState = .fetched
+
+            // Songs may not have finished syncing yet if we landed here
+            // straight from Selection (which never blocks on it). Same
+            // silent background fetch, triggered again here in case this
+            // is a fresh launch that never went through Selection this
+            // session at all. The home screen stays on its skeleton the
+            // whole time this runs, so the tab bar only appears once, fully
+            // formed, instead of growing tabs mid-flight.
+            if !prefsRepo.isDataLoaded {
+                await syncSongsInBackground()
+            } else {
+                isDatabaseReady = true
+            }
+        }
+    }
+
+    private func syncSongsInBackground() async {
+        do {
+            let fetchedSongs = try await songbkRepo.fetchRemoteSongs(for: prefsRepo.selectedBooks)
+            for song in fetchedSongs {
+                songbkRepo.saveSong(song)
+            }
+            await MainActor.run {
+                self.songs = songbkRepo.fetchLocalSongs()
+                self.prefsRepo.isDataLoaded = true
+                if books.indices.contains(selectedBook) {
+                    self.filterSongs(book: books[selectedBook].bookId)
+                }
+                self.isDatabaseReady = true
+            }
+        } catch {
+            print("❌ Background song sync failed: \(error)")
+            // Don't leave the user staring at a shimmer forever if the
+            // sync failed - fall back to whatever local data we have.
+            await MainActor.run {
+                self.isDatabaseReady = true
+            }
         }
     }
     
