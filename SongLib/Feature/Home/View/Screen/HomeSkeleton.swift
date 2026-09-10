@@ -7,49 +7,20 @@
 
 import SwiftUI
 
+/// Placeholder for the whole Home screen, shown while `MainViewModel` is
+/// still loading/syncing. Mirrors the real `HomeTabs` Search tab - same
+/// title, same content layout - with everything replaced by shimmering
+/// blocks. The tab bar itself stays hidden here (there's nothing to switch
+/// between yet), and appears for the first time already fully formed once
+/// `HomeTabs` takes over.
 struct HomeSkeleton: View {
     var body: some View {
-        TabView {
-            searchSkeleton
-                .tabItem {
-                    Label("Search", systemImage: "magnifyingglass")
-                }
-                .background(.primaryContainer)
-
-            Color.clear
-                .tabItem {
-                    Label("Likes", systemImage: "heart.fill")
-                }
-                .background(.primaryContainer)
-
-            Color.clear
-                .tabItem {
-                    Label("Listings", systemImage: "list.number")
-                }
-                .background(.primaryContainer)
-
-            Color.clear
-                .tabItem {
-                    Label("Drafts", systemImage: "doc.text")
-                }
-                .background(.primaryContainer)
-
-            Color.clear
-                .tabItem {
-                    Label("Settings", systemImage: "gear")
-                }
-                .background(.primaryContainer)
-        }
-        .disabled(true)
-    }
-
-    private var searchSkeleton: some View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 16) {
-                    RoundedRectangle(cornerRadius: 10)
+                    RoundedRectangle(cornerRadius: 12)
                         .fill(Color("surfaceVariant").opacity(0.3))
-                        .frame(height: 40)
+                        .frame(height: 44)
                         .shimmering()
                         .padding(.horizontal)
 
@@ -57,7 +28,7 @@ struct HomeSkeleton: View {
                         ForEach(0..<4, id: \.self) { _ in
                             RoundedRectangle(cornerRadius: 8)
                                 .fill(Color("surfaceVariant").opacity(0.3))
-                                .frame(width: 72, height: 32)
+                                .frame(width: 72, height: 28)
                                 .shimmering()
                         }
                         Spacer()
@@ -82,34 +53,36 @@ struct HomeSkeleton: View {
     }
 }
 
+/// Mirrors the real `SongItem` layout: a leading accent bar, a stacked
+/// title/subtitle, and a trailing heart placeholder.
 private struct SongItemSkeleton: View {
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(alignment: .center) {
+        HStack(alignment: .center, spacing: 10) {
+            RoundedRectangle(cornerRadius: 2)
+                .fill(Color("surfaceVariant").opacity(0.3))
+                .frame(width: 3, height: 36)
+                .shimmering()
+
+            VStack(alignment: .leading, spacing: 6) {
                 RoundedRectangle(cornerRadius: 4)
                     .fill(Color("surfaceVariant").opacity(0.3))
-                    .frame(width: 170, height: 18)
+                    .frame(width: 170, height: 14)
                     .shimmering()
 
-                Spacer()
-
-                RoundedRectangle(cornerRadius: 8)
+                RoundedRectangle(cornerRadius: 4)
                     .fill(Color("surfaceVariant").opacity(0.3))
-                    .frame(width: 40, height: 20)
+                    .frame(width: 110, height: 11)
                     .shimmering()
             }
 
-            RoundedRectangle(cornerRadius: 4)
-                .fill(Color("surfaceVariant").opacity(0.3))
-                .frame(height: 14)
-                .shimmering()
+            Spacer(minLength: 8)
 
-            RoundedRectangle(cornerRadius: 4)
+            Circle()
                 .fill(Color("surfaceVariant").opacity(0.3))
-                .frame(width: 220, height: 14)
+                .frame(width: 16, height: 16)
                 .shimmering()
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, 6)
         .padding(.horizontal, 10)
     }
 }

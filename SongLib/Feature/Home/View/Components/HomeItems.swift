@@ -25,7 +25,7 @@ struct BooksList: View {
             }
         }
         .padding(.leading, 5)
-        .frame(height: 35)
+        .frame(height: 36)
     }
 }
 
@@ -36,28 +36,42 @@ struct SongsSearchBar: View {
     var onCancel: (() -> Void)?
     
     var body: some View {
-        HStack(alignment: .center) {
+        HStack(spacing: 8) {
+            HStack(spacing: 8) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(Color("onSurfaceVariant").opacity(0.6))
+
+                TextField("Search songs …", text: $text)
+                    .focused($isFocused)
+                    .submitLabel(.search)
+
+                if !text.isEmpty {
+                    Button(action: { text = "" }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(Color("onSurfaceVariant").opacity(0.5))
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 10)
+            .background(Color("surfaceVariant").opacity(0.5))
+            .cornerRadius(12)
+
             if isFocused {
-                Button(action: {
+                Button("Cancel") {
                     text = ""
                     isFocused = false
                     hideKeyboard()
                     onCancel?()
-                }) {
-                    Image(systemName: "chevron.backward")
-                        .font(.largeTitle)
-                        .foregroundColor(.onPrimaryContainer)
                 }
-                .padding(.bottom, 5)
+                .font(.subheadline)
+                .foregroundColor(.primary1)
+                .transition(.move(edge: .trailing).combined(with: .opacity))
             }
-            
-            TextField("Search for songs ...", text: $text) .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding(.bottom, 15)
-                .padding(.top, 7)
-                .focused($isFocused)
         }
         .padding(.horizontal)
-        .animation(.easeInOut, value: isFocused)
+        .animation(.easeInOut(duration: 0.2), value: isFocused)
     }
 }
 

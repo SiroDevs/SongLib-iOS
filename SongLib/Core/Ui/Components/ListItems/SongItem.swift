@@ -21,52 +21,81 @@ struct SongItem: View {
         song.content.contains("CHORUS")
     }
 
-    private var chorusText: String {
-        hasChorus ? "Chorus" : ""
+    private var verseCount: Int {
+        verses.count - (hasChorus ? 1 : 0)
     }
 
-    private var versesText: String {
-        let count = verses.count
-        let base = hasChorus ? "\(count - 1) V" : "\(count) V"
-        return count == 1 ? base : "\(base)s"
+    private var versesLabel: String {
+        verseCount == 1 ? "1 v" : "\(verseCount) vs"
+    }
+
+    private var firstLine: String {
+        SongUtils.refineContent(txt: verses.first ?? "")
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            HStack(alignment: .center) {
-                Text(
-                    SongUtils.songItemTitle(number: song.songNo, title: song.title)
-                )
-                    .font(.title3)
+        HStack(alignment: .center, spacing: 10) {
+            RoundedRectangle(cornerRadius: 2)
+                .fill(song.liked ? Color.primary1 : Color("outline").opacity(0.35))
+                .frame(width: 3, height: 36)
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(SongUtils.songItemTitle(number: song.songNo, title: song.title))
+                    .font(.subheadline)
+                    .fontWeight(.semibold)
                     .foregroundColor(.scrim)
-                    .fontWeight(.bold)
                     .lineLimit(1)
+                    .truncationMode(.tail)
 
-                Spacer()
-
-                TagItem(tagText: versesText, height: height)
-
-                if hasChorus {
-                    TagItem(tagText: chorusText, height: height)
-                }
-
-                Image(systemName: song.liked ? "heart.fill" : "heart")
-                    .foregroundColor(.scrim)
+                Text(firstLine)
+                    .font(.footnote)
+                    .foregroundColor(Color("onSurfaceVariant").opacity(0.85))
+                    .lineLimit(1)
+                    .truncationMode(.tail)
             }
 
-            Text(SongUtils.refineContent(txt: verses.first ?? ""))
-                .lineLimit(2)
-                .foregroundColor(.scrim)
-                .font(.body)
-                .multilineTextAlignment(.leading)
+            Spacer(minLength: 8)
 
-            if isSearching {
-                TagItem(tagText: "Book \(song.book)", height: height)
+            VStack(alignment: .trailing, spacing: 5) {
+                Image(systemName: song.liked ? "heart.fill" : "heart")
+                    .font(.system(size: 13))
+                    .foregroundColor(song.liked ? .primary1 : Color("onSurfaceVariant").opacity(0.35))
+
+                HStack(spacing: 4) {
+                    SongChip(label: versesLabel)
+                    if hasChorus {
+                        SongChip(label: "C")
+                    }
+                }
             }
         }
-        .padding(.vertical, 5)
+        .padding(.vertical, 6)
         .padding(.horizontal, 10)
-        .background(isSelected ? .primary1 : Color.clear)
+        .background(isSelected ? Color.primary1.opacity(0.12) : Color.clear)
         .contentShape(Rectangle())
     }
+}
+
+/// Small pill used for the verse-count / chorus badges next to a song row.
+struct SongChip: View {
+    let label: String
+
+    var body: some View {
+        Text(label)
+            .font(.system(size: 10, weight: .medium))
+            .foregroundColor(Color("onSurfaceVariant"))
+            .padding(.horizontal, 6)
+            .padding(.vertical, 2)
+            .background(Color("surfaceVariant"))
+            .cornerRadius(4)
+    }
+}
+
+#Preview {
+    SongItem(
+        song: Song.sampleSongs[0],
+        height: 50,
+        isSelected: false,
+        isSearching: false
+    )
 }

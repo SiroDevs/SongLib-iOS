@@ -14,7 +14,7 @@ struct PresenterIndicators: View {
     
     var body: some View {
         ScrollView {
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 60))], spacing: 10) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: 44))], spacing: 10) {
                 ForEach(indicators.indices, id: \.self) { index in
                     IndicatorButton(
                         title: indicators[index],
@@ -28,6 +28,7 @@ struct PresenterIndicators: View {
     }
 }
 
+/// Circular verse/chorus badge, tapped to jump to that slide.
 struct IndicatorButton: View {
     let title: String
     let isSelected: Bool
@@ -40,25 +41,21 @@ struct IndicatorButton: View {
     }
     
     var body: some View {
-        let bgColor = isSelected ? .primary1 : Color("onPrimary")
+        let bgColor = isSelected ? Color.primary1 : Color("onPrimary")
         let txtColor = isSelected ? Color("onPrimary") : .scrim
 
         Button(action: action) {
             Text(title)
-                .font(.title3)
-                .fontWeight(.medium)
+                .font(.system(size: 16, weight: .bold))
                 .foregroundColor(txtColor)
-                .frame(width: 60, height: 40)
-                .background(
-                    RoundedRectangle(cornerRadius: 10).fill(bgColor)
-                )
+                .frame(width: 44, height: 44)
+                .background(Circle().fill(bgColor))
                 .overlay(
-                    RoundedRectangle(cornerRadius: 10)
-                        .stroke(bgColor, lineWidth: isSelected ? 0 : 2)
+                    Circle().stroke(Color("outline").opacity(0.3), lineWidth: isSelected ? 0 : 1)
                 )
-                .animation(.easeInOut(duration: 0.2), value: isSelected)
                 .shadow(color: .black.opacity(0.1), radius: 3, x: 0, y: 2)
         }
+        .animation(.easeInOut(duration: 0.15), value: isSelected)
     }
 }
 

@@ -15,9 +15,9 @@ struct PresenterTabs: View {
 
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 15)
+            RoundedRectangle(cornerRadius: 20)
                 .fill(.onPrimary)
-                .shadow(radius: 5)
+                .shadow(color: .black.opacity(0.08), radius: 8, x: 0, y: 3)
             
             if prefs.horizontalSlides {
                 Pager(page: selected, data: verses, id: \.self) {
@@ -37,13 +37,19 @@ struct VerseContent: View {
     let verse: String
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 15) {
+        VStack {
+            Spacer(minLength: 0)
+
             Text(verse)
-                .font(.largeTitle)
+                .font(.system(size: 30, weight: .medium))
                 .foregroundColor(.scrim)
-                .multilineTextAlignment(.leading)
+                .multilineTextAlignment(.center)
+                .lineSpacing(8)
+
+            Spacer(minLength: 0)
         }
-        .padding(15)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(24)
     }
 }
 

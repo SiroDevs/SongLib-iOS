@@ -20,17 +20,16 @@ struct BookItem: View {
             onPressed?()
         }) {
             Text(text)
-                .font(.title3)
-                .fontWeight(.bold)
+                .font(.subheadline)
+                .fontWeight(.semibold)
                 .foregroundColor(txtColor)
-                .padding(.horizontal, 15)
-                .padding(.vertical, 5)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
                 .background(bgColor)
-                .cornerRadius(20)
+                .cornerRadius(14)
         }
-        .padding(.bottom, 5)
         .buttonStyle(PlainButtonStyle())
-        .shadow(color: .black.opacity(0.1), radius: 3, x: 0, y: 2)
+        .shadow(color: .black.opacity(0.08), radius: 2, x: 0, y: 1)
     }
 }
 
