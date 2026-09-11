@@ -16,7 +16,7 @@ struct ListingContent: View {
             LazyVStack(alignment: .leading, spacing: 0) {
                 ForEach(Array(songs.enumerated()), id: \.element.id) { index, song in
                     NavigationLink {
-                        PresenterView(song: song)
+                        PresenterView(song: song, songs: songs)
                     } label: {
                         SongItem(
                             song: song,

@@ -44,6 +44,7 @@ struct HomeListings: View {
                     }
                 }
             }
+            .homeToolbar(viewModel: viewModel)
             .alert("New Listing", isPresented: $showNewListingAlert) {
                 newListingAlertContent
             } message: {

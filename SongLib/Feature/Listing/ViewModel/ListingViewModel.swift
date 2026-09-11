@@ -14,6 +14,7 @@ final class ListingViewModel: ObservableObject {
     private let songbkRepo: SongBookRepoProtocol
     private let listRepo: ListingRepoProtocol
     private let subsRepo: SubsRepoProtocol
+    private let draftRepo: DraftRepoProtocol
 
     @Published var uiState: UiState = .idle
     @Published var title: String = ""
@@ -30,18 +31,33 @@ final class ListingViewModel: ObservableObject {
     @Published var isProUser: Bool = false
     @Published var listingTitle: String = "Untitled List"
 
+    /// The songs surrounding whatever's currently loaded in the presenter
+    /// (e.g. the search results the user tapped a song from), plus where
+    /// in that list we currently are - powers the previous/next song
+    /// corner navigation.
+    @Published var contextSongs: [Song] = []
+    @Published var currentIndex: Int = 0
+
+    var hasPrevious: Bool { currentIndex > 0 }
+    var hasNext: Bool { currentIndex < contextSongs.count - 1 }
+    var currentSong: Song? {
+        contextSongs.indices.contains(currentIndex) ? contextSongs[currentIndex] : nil
+    }
+
     init(
         netUtils: NetworkUtils = .shared,
         prefsRepo: PrefsRepo,
         songbkRepo: SongBookRepoProtocol,
         listRepo: ListingRepoProtocol,
-        subsRepo: SubsRepoProtocol
+        subsRepo: SubsRepoProtocol,
+        draftRepo: DraftRepoProtocol
     ) {
         self.netUtils = netUtils
         self.prefsRepo = prefsRepo
         self.songbkRepo = songbkRepo
         self.listRepo = listRepo
         self.subsRepo = subsRepo
+        self.draftRepo = draftRepo
     }
     
     func validateSubscription() async {
@@ -72,7 +88,17 @@ final class ListingViewModel: ObservableObject {
         }
     }
 
-    func loadSong(song: Song) {
+    /// - Parameter context: the list `song` was tapped from (search
+    ///   results, likes, a listing, ...). Pass it whenever you have it so
+    ///   the presenter can offer previous/next song navigation; leave it
+    ///   empty for a one-off load (e.g. re-loading after an error) and the
+    ///   existing context is left untouched.
+    func loadSong(song: Song, context: [Song] = []) {
+        if !context.isEmpty {
+            contextSongs = context
+            currentIndex = context.firstIndex(where: { $0.id == song.id }) ?? 0
+        }
+
         uiState = .loading("Loading ...")
         
         indicators = []
@@ -108,18 +134,57 @@ final class ListingViewModel: ObservableObject {
         isLiked = song.liked
         uiState = .loaded
     }
+
+    /// Moves to the previous song in `contextSongs`, if any, reloading the
+    /// presenter with it.
+    func navigateToPrevious() {
+        guard hasPrevious else { return }
+        currentIndex -= 1
+        loadSong(song: contextSongs[currentIndex])
+    }
+
+    /// Moves to the next song in `contextSongs`, if any, reloading the
+    /// presenter with it.
+    func navigateToNext() {
+        guard hasNext else { return }
+        currentIndex += 1
+        loadSong(song: contextSongs[currentIndex])
+    }
     
     func likeSong(song: Song) {
         songbkRepo.likeSong(song)
         isLiked = !song.liked
         uiState = .liked
     }
+
+    /// Fetches the top-level listings so the "Add to a List" sheet has
+    /// something to show.
+    func fetchListings() {
+        listings = listRepo.fetchListings(for: 0)
+    }
+
+    /// Copies a song into Drafts so it can be freely edited, mirroring
+    /// Android's `DraftController.copyToDrafts`.
+    func copyToDrafts(song: Song) {
+        draftRepo.saveDraft(
+            title: SongUtils.songItemTitle(number: song.songNo, title: song.title),
+            content: song.content,
+            songNo: song.songNo,
+            book: song.book
+        )
+    }
     
     func saveListing(_ parent: Int, song: Int, title: String) {
         listRepo.saveListing(parent, title: title)
         Task { @MainActor in
-            listItems = listRepo.fetchListings(for: parent)
             listings = listRepo.fetchListings(for: 0)
+            // `saveListing` only creates the listing itself; attach the
+            // song to it as a second step, same as the manual
+            // create-then-attach flow SongsList already does.
+            if song != 0, let newListing = listings.first(where: { $0.title == title }) ?? listings.last {
+                listRepo.saveListItem(newListing, song: song)
+            }
+            listItems = listRepo.fetchListings(for: parent)
             uiState = .loaded
         }
     }

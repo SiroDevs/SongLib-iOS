@@ -82,6 +82,7 @@ struct HomeSearch: View {
             }
             .navigationTitle("SongLib")
             .toolbarBackground(.regularMaterial, for: .navigationBar)
+            .homeToolbar(viewModel: viewModel)
         }
     }
 }

@@ -151,6 +151,7 @@ struct DependencyMap {
                 songbkRepo: resolver.resolve(SongBookRepoProtocol.self)!,
                 listRepo: resolver.resolve(ListingRepoProtocol.self)!,
                 subsRepo: resolver.resolve(SubsRepoProtocol.self)!,
+                draftRepo: resolver.resolve(DraftRepoProtocol.self)!,
             )
         }.inObjectScope(.container)
         

@@ -17,6 +17,10 @@ struct HomeTabs: View {
             // true (see HomeView), so songs has already been populated by
             // then - these tabs no longer need to be gated on it, which is
             // what used to make them pop in after the fact.
+            //
+            // Drafts and Settings used to be tabs here too; they're now
+            // reached from the Drafts icon / More menu each of these three
+            // tabs carries in its own top bar (see HomeTopBarActions).
             HomeSearch(viewModel: viewModel)
                 .tabItem {
                     Label("Search", systemImage: "magnifyingglass")
@@ -32,18 +36,6 @@ struct HomeTabs: View {
             HomeListings(viewModel: viewModel)
                 .tabItem {
                     Label("Listings", systemImage: "list.number")
-                }
-                .background(.primaryContainer)
-
-            DraftsScreen()
-                .tabItem {
-                    Label("Drafts", systemImage: "doc.text")
-                }
-                .background(.primaryContainer)
-            
-            SettingsView(viewModel: viewModel)
-                .tabItem {
-                    Label("Settings", systemImage: "gear")
                 }
                 .background(.primaryContainer)
         }

@@ -90,7 +90,7 @@ struct SongsList: View {
     private var stateContent: some View {
         LazyVStack(spacing: 0) {
             ForEach(Array(songs.enumerated()), id: \.element.id) { index, song in
-                NavigationLink(destination: PresenterView(song: song)) {
+                NavigationLink(destination: PresenterView(song: song, songs: songs)) {
                     SongItem(
                         song: song,
                         height: 50,

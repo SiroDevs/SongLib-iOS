@@ -41,11 +41,6 @@ struct HomeView: View {
                 Task { viewModel.fetchData() }
             }
         } else if !viewModel.isDatabaseReady {
-            // Covers .idle/.loading/.fetched/.filtering - i.e. everything
-            // before the database has finished loading/syncing. Shown
-            // straight away (no Lottie splash in between) so selecting
-            // songbooks lands the user on Home immediately, just with a
-            // shimmering version of it.
             HomeSkeleton()
         } else {
             HomeTabs(viewModel: viewModel)

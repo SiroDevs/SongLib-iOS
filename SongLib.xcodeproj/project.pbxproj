@@ -12,7 +12,6 @@
 		1796FDF92E5484FD00298DBF /* SwiftUIPager in Frameworks */ = {isa = PBXBuildFile; productRef = 1796FDF82E5484FD00298DBF /* SwiftUIPager */; };
 		17B82DAF2E5920D600C58824 /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = 17B82DAE2E5920D600C58824 /* RevenueCatUI */; };
 		17B82DB12E5920DD00C58824 /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = 17B82DB02E5920DD00C58824 /* RevenueCat */; };
-		17DDC8182E41D4B400B54D2C /* Lottie in Frameworks */ = {isa = PBXBuildFile; productRef = 17DDC8172E41D4B400B54D2C /* Lottie */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -65,7 +64,6 @@
 				17B82DAF2E5920D600C58824 /* RevenueCatUI in Frameworks */,
 				173314E42DC159DB00318DD8 /* Swinject in Frameworks */,
 				17B82DB12E5920DD00C58824 /* RevenueCat in Frameworks */,
-				17DDC8182E41D4B400B54D2C /* Lottie in Frameworks */,
 				1796FDF92E5484FD00298DBF /* SwiftUIPager in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -136,7 +134,6 @@
 			name = SongLib;
 			packageProductDependencies = (
 				173314E32DC159DB00318DD8 /* Swinject */,
-				17DDC8172E41D4B400B54D2C /* Lottie */,
 				1796FDF82E5484FD00298DBF /* SwiftUIPager */,
 				17B82DAE2E5920D600C58824 /* RevenueCatUI */,
 				17B82DB02E5920DD00C58824 /* RevenueCat */,
@@ -226,7 +223,6 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				1733149D2DC1499100318DD8 /* XCRemoteSwiftPackageReference "Swinject" */,
-				171CB4262E4115B700915485 /* XCRemoteSwiftPackageReference "lottie-ios" */,
 				1796FDF72E5484BE00298DBF /* XCRemoteSwiftPackageReference "SwiftUIPager" */,
 				1752236B2E58CFBE00A2AD93 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
 				173F37F62E61BDCE0093421E /* XCRemoteSwiftPackageReference "SwiftUIModal" */,
@@ -610,14 +606,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		171CB4262E4115B700915485 /* XCRemoteSwiftPackageReference "lottie-ios" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/airbnb/lottie-ios.git";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 4.5.2;
-			};
-		};
 		1733149D2DC1499100318DD8 /* XCRemoteSwiftPackageReference "Swinject" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/Swinject/Swinject.git";
@@ -677,11 +665,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 1752236B2E58CFBE00A2AD93 /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
 			productName = RevenueCat;
-		};
-		17DDC8172E41D4B400B54D2C /* Lottie */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 171CB4262E4115B700915485 /* XCRemoteSwiftPackageReference "lottie-ios" */;
-			productName = Lottie;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

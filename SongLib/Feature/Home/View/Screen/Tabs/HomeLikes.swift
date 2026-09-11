@@ -43,6 +43,7 @@ struct HomeLikes: View {
             }
             .navigationTitle("Liked Songs")
             .toolbarBackground(.regularMaterial, for: .navigationBar)
+            .homeToolbar(viewModel: viewModel)
         }
     }
 }
