@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct HomeSearch: View {
-    @ObservedObject var viewModel: MainViewModel
+    @ObservedObject var viewModel: HomeViewModel
     @State private var searchQry: String = ""
     @State private var searchByNo: Bool = false
 
@@ -39,7 +39,6 @@ struct HomeSearch: View {
                             songs: viewModel.filtered,
                         )
                     }
-                    .background(.surface)
                     .padding(.vertical)
                 }
                 
@@ -81,8 +80,60 @@ struct HomeSearch: View {
                 }
             }
             .navigationTitle("SongLib")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.regularMaterial, for: .navigationBar)
-            .homeToolbar(viewModel: viewModel)
+            .homeToolbar(viewModel: viewModel, actions: [.drafts, .more])
         }
     }
+}
+
+struct HomeSearchMock: View {
+    var body: some View {
+        NavigationStack {
+            ZStack(alignment: .bottomTrailing) {
+                ScrollView {
+                    VStack(spacing: 1) {
+                        BooksList(
+                            books: Book.sampleBooks,
+                            selectedBook: 0,
+                            onSelect: { book in }
+                        )
+                        
+                        Spacer()
+                        SongsListMock(
+                            songs: Song.sampleSongs,
+                        )
+                    }
+                    .background(.surface)
+                    .padding(.vertical)
+                }
+                .navigationTitle("SongLib")
+                .toolbarBackground(.regularMaterial, for: .navigationBar)
+                
+                Button {
+                } label: {
+                    Image(systemName: "circle.grid.3x3.fill")
+                        .font(.title.weight(.semibold))
+                        .padding()
+                        .foregroundColor(.onPrimaryContainer)
+                        .background(.primaryContainer)
+                        .clipShape(Circle())
+                        .shadow(radius: 4, x: 0, y: 4)
+                }
+                .padding()
+                DialPad(
+                    onNumberClick: { num in
+                    },
+                    onBackspaceClick: {
+                    },
+                    onSearchClick: {
+                    }
+                )
+            }
+        }
+    }
+}
+
+#Preview {
+    HomeSearchMock()
 }

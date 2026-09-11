@@ -9,7 +9,7 @@ import SwiftUI
 import RevenueCatUI
 
 struct SongsList: View {
-    @ObservedObject var viewModel: MainViewModel
+    @ObservedObject var viewModel: HomeViewModel
     let songs: [Song]
 
     @State private var selectedSong: Song?

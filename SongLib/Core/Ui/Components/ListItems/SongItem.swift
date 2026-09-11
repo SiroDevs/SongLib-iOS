@@ -76,7 +76,6 @@ struct SongItem: View {
     }
 }
 
-/// Small pill used for the verse-count / chorus badges next to a song row.
 struct SongChip: View {
     let label: String
 

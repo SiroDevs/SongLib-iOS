@@ -28,7 +28,6 @@ struct PresenterIndicators: View {
     }
 }
 
-/// Circular verse/chorus badge, tapped to jump to that slide.
 struct IndicatorButton: View {
     let title: String
     let isSelected: Bool

@@ -36,8 +36,8 @@ struct SongsSearchBar: View {
     var onCancel: (() -> Void)?
     
     var body: some View {
-        HStack(spacing: 8) {
-            HStack(spacing: 8) {
+        HStack(spacing: 5) {
+            HStack(spacing: 5) {
                 Image(systemName: "magnifyingglass")
                     .foregroundColor(Color("onSurfaceVariant").opacity(0.6))
 
@@ -53,7 +53,7 @@ struct SongsSearchBar: View {
                     .buttonStyle(PlainButtonStyle())
                 }
             }
-            .padding(.horizontal, 12)
+            .padding(.horizontal, 5)
             .padding(.vertical, 10)
             .background(Color("surfaceVariant").opacity(0.5))
             .cornerRadius(12)

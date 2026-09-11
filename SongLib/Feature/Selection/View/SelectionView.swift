@@ -160,7 +160,7 @@ struct SelectionView: View {
     /// Books are persisted locally (fast, no network) — as soon as that's
     /// done we go straight to Home, same as Android. Song syncing itself
     /// happens silently afterward, kicked off here but never observed by
-    /// this view again (HomeView/MainViewModel picks it up independently
+    /// this view again (HomeView/HomeViewModel picks it up independently
     /// too, so this just gets it started immediately rather than waiting
     /// for Home's own .task to notice isDataLoaded is false).
     private func handleStateChange(_ state: UiState) {

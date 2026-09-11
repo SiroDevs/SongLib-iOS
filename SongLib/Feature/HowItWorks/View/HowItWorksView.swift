@@ -57,32 +57,23 @@ private let howItWorksSections: [HowItWorksSection] = [
 ]
 
 struct HowItWorksView: View {
-    @Environment(\.dismiss) private var dismiss
-
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Learn how to get the most out of SongLib")
-                        .font(.subheadline)
-                        .foregroundColor(Color("onSurfaceVariant"))
-                        .padding(.bottom, 4)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Learn how to get the most out of SongLib")
+                    .font(.subheadline)
+                    .foregroundColor(Color("onSurfaceVariant"))
+                    .padding(.bottom, 4)
 
-                    ForEach(howItWorksSections) { section in
-                        HowItWorksCard(section: section)
-                    }
-                }
-                .padding(16)
-            }
-            .background(.surface)
-            .navigationTitle("How It Works")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") { dismiss() }
+                ForEach(howItWorksSections) { section in
+                    HowItWorksCard(section: section)
                 }
             }
+            .padding(16)
         }
+        .background(.surface)
+        .navigationTitle("How It Works")
+        .navigationBarTitleDisplayMode(.inline)
     }
 }
 
@@ -138,5 +129,7 @@ private struct HowItWorksCard: View {
 }
 
 #Preview {
-    HowItWorksView()
+    NavigationStack {
+        HowItWorksView()
+    }
 }

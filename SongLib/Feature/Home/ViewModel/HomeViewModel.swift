@@ -8,7 +8,7 @@
 import Foundation
 import SwiftUI
 
-final class MainViewModel: ObservableObject {
+final class HomeViewModel: ObservableObject {
     private let prefsRepo: PrefsRepo
     private let songbkRepo: SongBookRepoProtocol
     private let listingRepo: ListingRepoProtocol

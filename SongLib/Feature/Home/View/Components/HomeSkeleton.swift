@@ -7,12 +7,6 @@
 
 import SwiftUI
 
-/// Placeholder for the whole Home screen, shown while `MainViewModel` is
-/// still loading/syncing. Mirrors the real `HomeTabs` Search tab - same
-/// title, same content layout - with everything replaced by shimmering
-/// blocks. The tab bar itself stays hidden here (there's nothing to switch
-/// between yet), and appears for the first time already fully formed once
-/// `HomeTabs` takes over.
 struct HomeSkeleton: View {
     var body: some View {
         NavigationStack {

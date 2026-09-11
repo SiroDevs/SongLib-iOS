@@ -7,12 +7,6 @@
 
 import SwiftUI
 
-/// A tappable corner of the verse card used to move to the previous/next
-/// song. Android draws an animated page-curl there; this is a simpler
-/// (but still tactile) equivalent - a curl image that dips and springs
-/// back on tap. Drop your `curl_left`/`curl_right` artwork into
-/// `Assets.xcassets/Presenter/` (stub image sets are already there - see
-/// the project README note) and this lights up automatically.
 struct SongNavZone: View {
     enum Corner {
         case leading, trailing
@@ -24,7 +18,7 @@ struct SongNavZone: View {
     @State private var isPressed = false
 
     private var imageName: String {
-        corner == .leading ? "curl_left" : "curl_right"
+        corner == .leading ? "CurlLeft" : "CurlRight"
     }
 
     var body: some View {

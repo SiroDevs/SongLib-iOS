@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct HomeLikes: View {
-    @ObservedObject var viewModel: MainViewModel
+    @ObservedObject var viewModel: HomeViewModel
 
     var body: some View {
         NavigationStack {
@@ -36,14 +36,39 @@ struct HomeLikes: View {
                                 songs: viewModel.likes,
                             )
                         }
-                        .background(.surface)
                         .padding(.vertical)
                     }
                 }
             }
             .navigationTitle("Liked Songs")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.regularMaterial, for: .navigationBar)
-            .homeToolbar(viewModel: viewModel)
+            .homeToolbar(viewModel: viewModel, actions: .more)
+        }
+    }
+}
+
+struct HomeLikesMock: View {
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(spacing: 1) {
+                    BooksList(
+                        books: Book.sampleBooks,
+                        selectedBook: 0,
+                        onSelect: { book in }
+                    )
+                    
+                    Spacer()
+                    SongsListMock(
+                        songs: Song.sampleSongs,
+                    )
+                }
+                .background(.surface)
+                .padding(.vertical)
+            }
+            .navigationTitle("Liked Songs")
+            .toolbarBackground(.regularMaterial, for: .navigationBar)
         }
     }
 }

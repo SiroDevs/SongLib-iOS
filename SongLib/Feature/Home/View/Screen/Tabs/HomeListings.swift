@@ -9,7 +9,7 @@ import SwiftUI
 import RevenueCatUI
 
 struct HomeListings: View {
-    @ObservedObject var viewModel: MainViewModel
+    @ObservedObject var viewModel: HomeViewModel
     @State private var showNewListingAlert = false
     @State private var showPaywall = false
     @State private var showProLimit = false
@@ -34,6 +34,7 @@ struct HomeListings: View {
                 }
             }
             .navigationTitle("Song Listings")
+            .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.regularMaterial, for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -44,7 +45,7 @@ struct HomeListings: View {
                     }
                 }
             }
-            .homeToolbar(viewModel: viewModel)
+            .homeToolbar(viewModel: viewModel, actions: .more)
             .alert("New Listing", isPresented: $showNewListingAlert) {
                 newListingAlertContent
             } message: {
@@ -130,6 +131,56 @@ private struct ListingsScrollView: View {
             }
             .background(.surface)
             .padding(.vertical)
+        }
+    }
+}
+
+struct HomeListingsMock: View {
+    @State private var showNewListingAlert = false
+    @State private var newListingTitle = ""
+
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                ForEach(Listing.sampleListings.indices, id: \.self) { index in
+                    let listing = Listing.sampleListings[index]
+
+                    VStack(spacing: 0) {
+                        NavigationLink {
+                            ListingView(listing: listing)
+                        } label: {
+                            ListingItem(listing: listing)
+                        }
+
+                        if index < Listing.sampleListings.count - 1 {
+                            Divider()
+                        }
+                    }
+                }
+                .background(.surface)
+                .padding(.vertical)
+            }
+            .navigationTitle("Song Listings")
+            .toolbarBackground(.regularMaterial, for: .navigationBar)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        showNewListingAlert = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
+                }
+            }
+            .alert("New Listing", isPresented: $showNewListingAlert) {
+                TextField("Listing title", text: $newListingTitle)
+                Button("Add", action: {
+                    guard !newListingTitle.trimmingCharacters(in: .whitespaces).isEmpty else { return }
+                    newListingTitle = ""
+                })
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("Enter a title for your new song listing")
+            }
         }
     }
 }

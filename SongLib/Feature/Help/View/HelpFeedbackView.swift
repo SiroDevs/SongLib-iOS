@@ -27,94 +27,87 @@ struct HelpFeedbackView: View {
     private let recipient = "futuristicken@gmail.com"
 
     var body: some View {
-        NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    infoCard
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                infoCard
 
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Title *")
-                            .font(.caption)
-                            .foregroundColor(Color("onSurfaceVariant"))
-                        TextField("Brief summary of your issue or suggestion", text: $title)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .onChange(of: title) { _ in titleError = false }
-                        if titleError {
-                            Text("Title is required")
-                                .font(.caption2)
-                                .foregroundColor(.red)
-                        }
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Title *")
+                        .font(.caption)
+                        .foregroundColor(Color("onSurfaceVariant"))
+                    TextField("Brief summary of your issue or suggestion", text: $title)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .onChange(of: title) { _ in titleError = false }
+                    if titleError {
+                        Text("Title is required")
+                            .font(.caption2)
+                            .foregroundColor(.red)
                     }
-
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Description *")
-                            .font(.caption)
-                            .foregroundColor(Color("onSurfaceVariant"))
-                        TextEditor(text: $description)
-                            .frame(minHeight: 120)
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color("outline").opacity(0.4), lineWidth: 1)
-                            )
-                            .onChange(of: description) { _ in descriptionError = false }
-                        if descriptionError {
-                            Text("Description is required")
-                                .font(.caption2)
-                                .foregroundColor(.red)
-                        }
-                    }
-
-                    attachmentsSection
-
-                    Divider()
-
-                    Button(action: submit) {
-                        HStack {
-                            Image(systemName: "envelope.fill")
-                            Text("Contact Us")
-                                .fontWeight(.semibold)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding(.vertical, 14)
-                    }
-                    .buttonStyle(PlainButtonStyle())
-                    .background(Color.primary1)
-                    .foregroundColor(.onPrimary)
-                    .cornerRadius(12)
                 }
-                .padding(16)
-            }
-            .background(.surface)
-            .navigationTitle("Help & Feedback")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") { dismiss() }
-                }
-            }
-            .onChange(of: pickerItems) { newItems in
-                loadAttachments(from: newItems)
-            }
-            .sheet(isPresented: $showMailComposer) {
-                MailComposeView(
-                    recipient: recipient,
-                    subject: "SongLib: \(title)",
-                    body: emailBody,
-                    attachments: attachments.map { attachment in
-                        (
-                            data: attachment.image.jpegData(compressionQuality: 0.85) ?? Data(),
-                            mimeType: "image/jpeg",
-                            fileName: attachment.fileName
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Description *")
+                        .font(.caption)
+                        .foregroundColor(Color("onSurfaceVariant"))
+                    TextEditor(text: $description)
+                        .frame(minHeight: 120)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(Color("outline").opacity(0.4), lineWidth: 1)
                         )
-                    },
-                    onFinish: { dismiss() }
-                )
+                        .onChange(of: description) { _ in descriptionError = false }
+                    if descriptionError {
+                        Text("Description is required")
+                            .font(.caption2)
+                            .foregroundColor(.red)
+                    }
+                }
+
+                attachmentsSection
+
+                Divider()
+
+                Button(action: submit) {
+                    HStack {
+                        Image(systemName: "envelope.fill")
+                        Text("Contact Us")
+                            .fontWeight(.semibold)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                }
+                .buttonStyle(PlainButtonStyle())
+                .background(Color.primary1)
+                .foregroundColor(.onPrimary)
+                .cornerRadius(12)
             }
-            .alert("Mail isn't set up", isPresented: $showMailUnavailableAlert) {
-                Button("OK", role: .cancel) {}
-            } message: {
-                Text("Add a Mail account in Settings, or reach us directly at \(recipient).")
-            }
+            .padding(16)
+        }
+        .background(.surface)
+        .navigationTitle("Help & Feedback")
+        .navigationBarTitleDisplayMode(.inline)
+        .onChange(of: pickerItems) { newItems in
+            loadAttachments(from: newItems)
+        }
+        .sheet(isPresented: $showMailComposer) {
+            MailComposeView(
+                recipient: recipient,
+                subject: "SongLib: \(title)",
+                body: emailBody,
+                attachments: attachments.map { attachment in
+                    (
+                        data: attachment.image.jpegData(compressionQuality: 0.85) ?? Data(),
+                        mimeType: "image/jpeg",
+                        fileName: attachment.fileName
+                    )
+                },
+                onFinish: { dismiss() }
+            )
+        }
+        .alert("Mail isn't set up", isPresented: $showMailUnavailableAlert) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text("Add a Mail account in Settings, or reach us directly at \(recipient).")
         }
     }
 
@@ -240,5 +233,7 @@ struct HelpFeedbackView: View {
 }
 
 #Preview {
-    HelpFeedbackView()
+    NavigationStack {
+        HelpFeedbackView()
+    }
 }

@@ -16,46 +16,44 @@ struct DraftsScreen: View {
     @State private var showEditor = false
 
     var body: some View {
-        NavigationStack {
-            Group {
-                if viewModel.drafts.isEmpty {
-                    EmptyState(
-                        title: "No drafts yet",
-                        message: "Drafts are saved on this device only."
-                    )
-                } else {
-                    List {
-                        ForEach(viewModel.drafts) { draft in
-                            Button {
-                                editingDraft = draft
-                                showEditor = true
-                            } label: {
-                                DraftRow(draft: draft)
-                            }
-                            .foregroundColor(.primary)
+        Group {
+            if viewModel.drafts.isEmpty {
+                EmptyState(
+                    title: "No drafts yet",
+                    message: "Drafts are saved on this device only."
+                )
+            } else {
+                List {
+                    ForEach(viewModel.drafts) { draft in
+                        Button {
+                            editingDraft = draft
+                            showEditor = true
+                        } label: {
+                            DraftRow(draft: draft)
                         }
-                        .onDelete(perform: deleteDrafts)
+                        .foregroundColor(.primary)
                     }
-                    .listStyle(.plain)
+                    .onDelete(perform: deleteDrafts)
+                }
+                .listStyle(.plain)
+            }
+        }
+        .navigationTitle("Drafts")
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
+                    editingDraft = viewModel.createDraft()
+                    showEditor = true
+                } label: {
+                    Image(systemName: "plus")
                 }
             }
-            .navigationTitle("Drafts")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        editingDraft = viewModel.createDraft()
-                        showEditor = true
-                    } label: {
-                        Image(systemName: "plus")
-                    }
-                }
-            }
-            .task { viewModel.fetchDrafts() }
-            .sheet(isPresented: $showEditor, onDismiss: { viewModel.fetchDrafts() }) {
-                if let draft = editingDraft {
-                    NavigationStack {
-                        DraftEditorView(draft: draft)
-                    }
+        }
+        .task { viewModel.fetchDrafts() }
+        .sheet(isPresented: $showEditor, onDismiss: { viewModel.fetchDrafts() }) {
+            if let draft = editingDraft {
+                NavigationStack {
+                    DraftEditorView(draft: draft)
                 }
             }
         }

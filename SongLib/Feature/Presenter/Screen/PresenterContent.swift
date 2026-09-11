@@ -22,9 +22,6 @@ struct PresenterContent: View {
     @State private var showProLimit = false
     @State private var showPaywall = false
 
-    /// The song actually on screen - after navigating with the corner
-    /// arrows this is no longer necessarily `song`, the one the presenter
-    /// was originally opened with.
     private var activeSong: Song {
         viewModel.currentSong ?? song
     }
@@ -48,11 +45,10 @@ struct PresenterContent: View {
                     indicators: viewModel.indicators,
                     selected: selected
                 )
+                .padding(.trailing, 60)
                 .fixedSize(horizontal: false, vertical: true)
             }
 
-            // Floating share button, in place of the old top-bar share
-            // icon - same spot/role as Android's presenter FAB.
             VStack {
                 Spacer()
                 HStack {
@@ -68,7 +64,7 @@ struct PresenterContent: View {
                     }
                     .padding(.trailing, 20)
                 }
-                .padding(.bottom, 78)
+                .padding(.bottom, 10)
             }
         }
         .background(.surface)

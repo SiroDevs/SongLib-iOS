@@ -7,16 +7,20 @@
 
 import SwiftUI
 
-/// Drafts icon + "More" overflow menu (App Settings / How It Works /
-/// Help & Feedback), shown on every Home tab's own top bar - mirrors
-/// Android's `HomeOverflowMenu`, minus the account-only items iOS doesn't
-/// have (casting, profile). Drafts used to be its own tab; now it's this
-/// icon, so it's reachable from Search, Likes, and Listings alike.
+struct HomeToolbarAction: OptionSet {
+    let rawValue: Int
+
+    static let drafts = HomeToolbarAction(rawValue: 1 << 0)
+    static let more = HomeToolbarAction(rawValue: 1 << 1)
+
+    static let all: HomeToolbarAction = [.drafts, .more]
+}
+
 private struct HomeTopBarActions: ViewModifier {
-    @ObservedObject var viewModel: MainViewModel
+    @ObservedObject var viewModel: HomeViewModel
+    let actions: HomeToolbarAction
 
     @State private var showDrafts = false
-    @State private var showSettings = false
     @State private var showHowItWorks = false
     @State private var showHelp = false
 
@@ -24,54 +28,50 @@ private struct HomeTopBarActions: ViewModifier {
         content
             .toolbar {
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    Button {
-                        showDrafts = true
-                    } label: {
-                        Image(systemName: "doc.text")
+                    if actions.contains(.drafts) {
+                        Button {
+                            showDrafts = true
+                        } label: {
+                            Image(systemName: "doc.text")
+                        }
                     }
 
-                    Menu {
-                        Button {
-                            showSettings = true
-                        } label: {
-                            Label("App Settings", systemImage: "gearshape")
-                        }
+                    if actions.contains(.more) {
+                        Menu {
+                            Button {
+                                showHowItWorks = true
+                            } label: {
+                                Label("How It Works", systemImage: "info.circle")
+                            }
 
-                        Button {
-                            showHowItWorks = true
+                            Button {
+                                showHelp = true
+                            } label: {
+                                Label("Help & Feedback", systemImage: "questionmark.circle")
+                            }
                         } label: {
-                            Label("How It Works", systemImage: "info.circle")
+                            Image(systemName: "ellipsis.circle")
                         }
-
-                        Button {
-                            showHelp = true
-                        } label: {
-                            Label("Help & Feedback", systemImage: "questionmark.circle")
-                        }
-                    } label: {
-                        Image(systemName: "ellipsis.circle")
                     }
                 }
             }
-            .sheet(isPresented: $showDrafts) {
+            .navigationDestination(isPresented: $showDrafts) {
                 DraftsScreen()
+                    .toolbar(.hidden, for: .tabBar)
             }
-            .sheet(isPresented: $showSettings) {
-                SettingsView(viewModel: viewModel)
-            }
-            .sheet(isPresented: $showHowItWorks) {
+            .navigationDestination(isPresented: $showHowItWorks) {
                 HowItWorksView()
+                    .toolbar(.hidden, for: .tabBar)
             }
-            .sheet(isPresented: $showHelp) {
+            .navigationDestination(isPresented: $showHelp) {
                 HelpFeedbackView()
+                    .toolbar(.hidden, for: .tabBar)
             }
     }
 }
 
 extension View {
-    /// Attaches the shared Drafts + More toolbar to a Home tab's own
-    /// `NavigationStack` root.
-    func homeToolbar(viewModel: MainViewModel) -> some View {
-        modifier(HomeTopBarActions(viewModel: viewModel))
+    func homeToolbar(viewModel: HomeViewModel, actions: HomeToolbarAction = .more) -> some View {
+        modifier(HomeTopBarActions(viewModel: viewModel, actions: actions))
     }
 }

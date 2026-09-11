@@ -13,10 +13,6 @@ struct PresenterView: View {
         DiContainer.shared.resolve(ListingViewModel.self)
     }()
     let song: Song
-    /// The list `song` was opened from (search results, likes, a listing,
-    /// ...) - lets the presenter offer previous/next song navigation.
-    /// Leave empty for a standalone open (e.g. a deep link) with no
-    /// surrounding list.
     var songs: [Song] = []
 
     @StateObject private var selectedPage = Page.first()

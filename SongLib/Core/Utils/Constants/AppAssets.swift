@@ -8,4 +8,6 @@
 struct AppAssets {
     static let mainIcon = "MainIcon"
     static let emptyIcon = "EmptyIcon"
+    static let curlLeft = "CurlLeft"
+    static let curlRight = "CurlRight"
 }

@@ -143,7 +143,7 @@ final class SelectionViewModel: ObservableObject {
 
     /// Fire-and-forget: fetches + saves songs for the selected books.
     /// Never observed by a dedicated screen — SelectionView starts this
-    /// right as it navigates to Home, and HomeView/MainViewModel triggers
+    /// right as it navigates to Home, and HomeView/HomeViewModel triggers
     /// it too if it notices isDataLoaded is still false. Whichever runs
     /// first wins; the user never sees a loading/saving state for it.
     func syncSongsInBackground() {
