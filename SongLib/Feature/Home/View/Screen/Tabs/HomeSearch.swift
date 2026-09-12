@@ -12,37 +12,41 @@ struct HomeSearch: View {
     @State private var searchQry: String = ""
     @State private var searchByNo: Bool = false
 
+    @State private var editMode: EditMode = .inactive
+    @State private var selectedIDs: Set<Int> = []
+
+    private var isEditing: Bool { editMode == .active }
+
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottomTrailing) {
-                ScrollView {
-                    VStack(spacing: 1) {
-                        SongsSearchBar(text: $searchQry, onCancel: {
-                            searchQry = ""
-                            viewModel.searchSongs(qry: "")
-                        })
-                        .onChange(of: searchQry) { newValue in
-                            viewModel.searchSongs(qry: newValue, byNo: searchByNo)
-                        }
-
-                        BooksList(
-                            books: viewModel.books,
-                            selectedBook: viewModel.selectedBook,
-                            onSelect: { book in
-                                viewModel.selectedBook = viewModel.books.firstIndex(of: book) ?? 0
-                                viewModel.filterSongs(book: book.bookId)
-                            }
-                        )
-
-                        SongsList(
-                            viewModel: viewModel,
-                            songs: viewModel.filtered,
-                        )
+                VStack(spacing: 1) {
+                    SongsSearchBar(text: $searchQry, onCancel: {
+                        searchQry = ""
+                        viewModel.searchSongs(qry: "")
+                    })
+                    .onChange(of: searchQry) { newValue in
+                        viewModel.searchSongs(qry: newValue, byNo: searchByNo)
                     }
-                    .padding(.vertical)
+
+                    BooksList(
+                        books: viewModel.books,
+                        selectedBook: viewModel.selectedBook,
+                        onSelect: { book in
+                            viewModel.selectedBook = viewModel.books.firstIndex(of: book) ?? 0
+                            viewModel.filterSongs(book: book.bookId)
+                        }
+                    )
+
+                    SongsList(
+                        viewModel: viewModel,
+                        songs: viewModel.filtered,
+                        editMode: $editMode,
+                        selectedIDs: $selectedIDs
+                    )
                 }
-                
-                if viewModel.isProUser {
+
+                if viewModel.isProUser && !isEditing {
                     Button {
                         searchByNo = true
                         searchQry = ""
@@ -79,10 +83,23 @@ struct HomeSearch: View {
                     }
                 }
             }
-            .navigationTitle("SongLib")
+            .navigationTitle(isEditing ? "\(selectedIDs.count) selected" : "SongLib")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.regularMaterial, for: .navigationBar)
-            .homeToolbar(viewModel: viewModel, actions: [.drafts, .more])
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(isEditing ? "Done" : "Edit") {
+                        withAnimation {
+                            editMode = isEditing ? .inactive : .active
+                            if !isEditing {
+                                selectedIDs.removeAll()
+                            }
+                        }
+                    }
+                }
+            }
+            .toolbar(isEditing ? .hidden : .visible, for: .tabBar)
+            .homeToolbar(viewModel: viewModel, actions: isEditing ? [] : [.drafts, .more])
         }
     }
 }

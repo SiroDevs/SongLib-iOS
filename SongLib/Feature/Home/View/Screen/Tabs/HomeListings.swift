@@ -15,6 +15,12 @@ struct HomeListings: View {
     @State private var showProLimit = false
     @State private var newListingTitle = ""
 
+    @State private var editMode: EditMode = .inactive
+    @State private var selectedIDs: Set<Int> = []
+    @State private var showDeleteConfirm = false
+
+    private var isEditing: Bool { editMode == .active }
+
     var body: some View {
         NavigationStack {
             VStack {
@@ -29,23 +35,62 @@ struct HomeListings: View {
                             messageIcon: Image(systemName: "list.number")
                         )
                     } else {
-                        ListingsScrollView(listings: viewModel.listings)
+                        ListingsScrollView(
+                            listings: viewModel.listings,
+                            editMode: $editMode,
+                            selectedIDs: $selectedIDs,
+                            onDelete: { id in viewModel.deleteListing(id) }
+                        )
                     }
                 }
             }
-            .navigationTitle("Song Listings")
+            .navigationTitle(isEditing ? "\(selectedIDs.count) selected" : "Song Listings")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.regularMaterial, for: .navigationBar)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        checkAndHandleNewListing()
-                    } label: {
-                        Image(systemName: "plus")
+                if !viewModel.listings.isEmpty {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button(isEditing ? "Done" : "Edit") {
+                            withAnimation {
+                                editMode = isEditing ? .inactive : .active
+                                if !isEditing {
+                                    selectedIDs.removeAll()
+                                }
+                            }
+                        }
+                    }
+                }
+                if !isEditing {
+                    ToolbarItem(placement: .navigationBarTrailing) {
+                        Button {
+                            checkAndHandleNewListing()
+                        } label: {
+                            Image(systemName: "plus")
+                        }
+                    }
+                }
+                if isEditing {
+                    ToolbarItemGroup(placement: .bottomBar) {
+                        Button(role: .destructive) {
+                            showDeleteConfirm = true
+                        } label: {
+                            Label("Delete", systemImage: "trash")
+                        }
+                        .disabled(selectedIDs.isEmpty)
+
+                        Spacer()
+
+                        Button {
+                            selectedIDs.removeAll()
+                        } label: {
+                            Label("Clear", systemImage: "xmark.circle")
+                        }
+                        .disabled(selectedIDs.isEmpty)
                     }
                 }
             }
-            .homeToolbar(viewModel: viewModel, actions: .more)
+            .homeToolbar(viewModel: viewModel, actions: isEditing ? [] : .more)
+            .toolbar(isEditing ? .hidden : .visible, for: .tabBar)
             .alert("New Listing", isPresented: $showNewListingAlert) {
                 newListingAlertContent
             } message: {
@@ -58,6 +103,15 @@ struct HomeListings: View {
                 }
             } message: {
                 Text("Please purchase a subscription if you want to continue using this feature and all other Pro features.")
+            }
+            .alert("Delete \(selectedIDs.count) \(selectedIDs.count == 1 ? "listing" : "listings")?", isPresented: $showDeleteConfirm) {
+                Button("Cancel", role: .cancel) {}
+                Button("Delete", role: .destructive) {
+                    viewModel.deleteListings(selectedIDs)
+                    selectedIDs.removeAll()
+                }
+            } message: {
+                Text("This can't be undone.")
             }
             .sheet(isPresented: $showPaywall) {
             #if !DEBUG
@@ -109,31 +163,6 @@ struct HomeListings: View {
     }
 }
 
-private struct ListingsScrollView: View {
-    let listings: [Listing]
-
-    var body: some View {
-        ScrollView {
-            LazyVStack(spacing: 0) {
-                ForEach(Array(listings.enumerated()), id: \.element.id) { index, listing in
-                    VStack(spacing: 0) {
-                        NavigationLink {
-                            ListingView(listing: listing)
-                        } label: {
-                            ListingItem(listing: listing)
-                        }
-
-                        if index < listings.count - 1 {
-                            Divider()
-                        }
-                    }
-                }
-            }
-            .background(.surface)
-            .padding(.vertical)
-        }
-    }
-}
 
 struct HomeListingsMock: View {
     @State private var showNewListingAlert = false

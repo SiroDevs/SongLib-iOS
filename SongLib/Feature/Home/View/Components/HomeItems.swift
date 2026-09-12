@@ -75,6 +75,37 @@ struct SongsSearchBar: View {
     }
 }
 
+struct ListingsScrollView: View {
+    let listings: [Listing]
+    @Binding var editMode: EditMode
+    @Binding var selectedIDs: Set<Int>
+    let onDelete: (Int) -> Void
+
+    var body: some View {
+        List(selection: $selectedIDs) {
+            ForEach(listings) { listing in
+                NavigationLink {
+                    ListingView(listing: listing)
+                } label: {
+                    ListingItem(listing: listing)
+                }
+                .listRowInsets(EdgeInsets())
+                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                    Button(role: .destructive) {
+                        onDelete(listing.id)
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                }
+            }
+        }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .background(.surface)
+        .environment(\.editMode, $editMode)
+    }
+}
+
 extension View {
     func hideKeyboard() {
         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder),

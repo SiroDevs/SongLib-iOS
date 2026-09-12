@@ -14,6 +14,7 @@ final class HomeViewModel: ObservableObject {
     private let listingRepo: ListingRepoProtocol
     private let reviewRepo: ReviewReqRepoProtocol
     private let subsRepo: SubsRepoProtocol
+    private let draftRepo: DraftRepoProtocol
     
     @Published var isProUser: Bool = false
     @Published var horizontalSlides: Bool = false
@@ -33,13 +34,15 @@ final class HomeViewModel: ObservableObject {
         songbkRepo: SongBookRepoProtocol,
         listingRepo: ListingRepoProtocol,
         reviewRepo: ReviewReqRepoProtocol,
-        subsRepo: SubsRepoProtocol
+        subsRepo: SubsRepoProtocol,
+        draftRepo: DraftRepoProtocol
     ) {
         self.prefsRepo = prefsRepo
         self.songbkRepo = songbkRepo
         self.listingRepo = listingRepo
         self.reviewRepo = reviewRepo
         self.subsRepo = subsRepo
+        self.draftRepo = draftRepo
     }
     
     private func validateSubscription(isOnline: Bool) async throws {
@@ -73,9 +76,6 @@ final class HomeViewModel: ObservableObject {
     
     func fetchData() {
         uiState = .loading("")
-        // Reset readiness on every fetch so a re-fetch (e.g. after an error,
-        // or "Clear Data") goes back through the skeleton instead of
-        // flashing the previous, now-stale, full UI.
         isDatabaseReady = prefsRepo.isDataLoaded
         Task { @MainActor in
             try await validateSubscription(isOnline: false)
@@ -85,13 +85,6 @@ final class HomeViewModel: ObservableObject {
             listings = listingRepo.fetchListings(for: 0)
             uiState = .fetched
 
-            // Songs may not have finished syncing yet if we landed here
-            // straight from Selection (which never blocks on it). Same
-            // silent background fetch, triggered again here in case this
-            // is a fresh launch that never went through Selection this
-            // session at all. The home screen stays on its skeleton the
-            // whole time this runs, so the tab bar only appears once, fully
-            // formed, instead of growing tabs mid-flight.
             if !prefsRepo.isDataLoaded {
                 await syncSongsInBackground()
             } else {
@@ -116,8 +109,6 @@ final class HomeViewModel: ObservableObject {
             }
         } catch {
             print("❌ Background song sync failed: \(error)")
-            // Don't leave the user staring at a shimmer forever if the
-            // sync failed - fall back to whatever local data we have.
             await MainActor.run {
                 self.isDatabaseReady = true
             }
@@ -143,6 +134,22 @@ final class HomeViewModel: ObservableObject {
         songbkRepo.likeSong(song)
         uiState = .filtered
     }
+
+    func likeSongs(_ songs: [Song]) {
+        for song in songs {
+            songbkRepo.likeSong(song)
+        }
+        uiState = .filtered
+    }
+
+    func copyToDrafts(song: Song) {
+        draftRepo.saveDraft(
+            title: SongUtils.songItemTitle(number: song.songNo, title: song.title),
+            content: song.content,
+            songNo: song.songNo,
+            book: song.book
+        )
+    }
     
     func saveListing(_ parent: Int, title: String) {
         listingRepo.saveListing(parent, title: title)
@@ -162,6 +169,16 @@ final class HomeViewModel: ObservableObject {
     
     func deleteListing(_ listing: Int) {
         listingRepo.deleteListing(with: listing)
+        Task { @MainActor in
+            listings = listingRepo.fetchListings(for: 0)
+            uiState = .filtered
+        }
+    }
+
+    func deleteListings(_ ids: Set<Int>) {
+        for id in ids {
+            listingRepo.deleteListing(with: id)
+        }
         Task { @MainActor in
             listings = listingRepo.fetchListings(for: 0)
             uiState = .filtered
