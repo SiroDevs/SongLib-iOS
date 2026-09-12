@@ -42,7 +42,6 @@ struct SongsList: View {
                     }
                     .listRowInsets(EdgeInsets())
                     .listRowSeparatorTint(Color("outline").opacity(0.2))
-                    // Left swipe: Like, Share.
                     .swipeActions(edge: .leading, allowsFullSwipe: false) {
                         Button {
                             likeSong(song: song)

@@ -15,18 +15,15 @@ struct DialPad: View {
     private let dialPadItems: [[Any]] = {
         if UIDevice.current.userInterfaceIdiom == .pad {
             return [
-                ["4", "5", "6", "7", "8", "9"],
-                ["3", "2", "1", "0",
-                 ("delete.left", { }),
-                 ("checkmark", { })]
+                ["1", "2", "3", "4", "5", "6"],
+                ["7", "8", "9", "0", ("delete.left", { }), ("checkmark", { })]
             ]
         } else {
             return [
-                ["6", "7", "8", "9"],
-                ["2", "3", "4", "5"],
-                ["1", "0",
-                 ("delete.left", { }),
-                 ("checkmark", { })]
+                ["1", "2", "3"],
+                ["4", "5", "6"],
+                ["7", "8", "9"],
+                ["0", ("delete.left", { }), ("checkmark", { })]
             ]
         }
     }()
@@ -70,12 +67,14 @@ struct DialButton: View {
     var body: some View {
         Button(action: action) {
             Text(label)
-                .font(.largeTitle)
+                .font(.title2)
                 .foregroundColor(.primary1)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .frame(width: 48, height: 36)
         }
-        .aspectRatio(1, contentMode: .fit)
-        .background(Circle().stroke(.primary1, lineWidth: 2))
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(.primary1, lineWidth: 2)
+        )
     }
 }
 
@@ -86,23 +85,13 @@ struct DialIconButton: View {
     var body: some View {
         Button(action: action) {
             Image(systemName: systemName)
-                .font(.title)
+                .font(.body)
                 .foregroundColor(.primary1)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .frame(width: 48, height: 36)
         }
-        .aspectRatio(1, contentMode: .fit)
-        .background(Circle().stroke(.primary1, lineWidth: 2))
+        .background(
+            RoundedRectangle(cornerRadius: 10)
+                .stroke(.primary1, lineWidth: 2)
+        )
     }
-}
-
-//#Preview {
-//    DialPad(
-//        onNumberClick: {_ in },
-//        onBackspaceClick: {},
-//        onSearchClick: {}
-//    )
-//}
-
-#Preview {
-    HomeSearchMock()
 }

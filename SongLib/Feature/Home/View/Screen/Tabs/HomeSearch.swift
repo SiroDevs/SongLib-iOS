@@ -11,55 +11,80 @@ struct HomeSearch: View {
     @ObservedObject var viewModel: HomeViewModel
     @State private var searchQry: String = ""
     @State private var searchByNo: Bool = false
+    @State private var scrollViewProxy: ScrollViewProxy? = nil
+    @State private var isAtTop: Bool = true
 
     @State private var editMode: EditMode = .inactive
     @State private var selectedIDs: Set<Int> = []
 
+    private let scrollSpace = "homeSearchScroll"
     private var isEditing: Bool { editMode == .active }
 
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottomTrailing) {
-                VStack(spacing: 1) {
-                    SongsSearchBar(text: $searchQry, onCancel: {
-                        searchQry = ""
-                        viewModel.searchSongs(qry: "")
-                    })
-                    .onChange(of: searchQry) { newValue in
-                        viewModel.searchSongs(qry: newValue, byNo: searchByNo)
-                    }
+                ScrollViewReader { proxy in
+                    ScrollView {
+                        VStack(spacing: 1) {
+                            Color.clear
+                                .frame(height: 0)
+                                .id("top")
+                                .trackScrollOffset(coordinateSpace: scrollSpace) { offset in
+                                    isAtTop = offset >= -5
+                                }
 
-                    BooksList(
-                        books: viewModel.books,
-                        selectedBook: viewModel.selectedBook,
-                        onSelect: { book in
-                            viewModel.selectedBook = viewModel.books.firstIndex(of: book) ?? 0
-                            viewModel.filterSongs(book: book.bookId)
+                            SongsSearchBar(text: $searchQry, onCancel: {
+                                searchQry = ""
+                                viewModel.searchSongs(qry: "")
+                            })
+                            .onChange(of: searchQry) { newValue in
+                                viewModel.searchSongs(qry: newValue, byNo: searchByNo)
+                            }
+
+                            BooksList(
+                                books: viewModel.books,
+                                selectedBook: viewModel.selectedBook,
+                                onSelect: { book in
+                                    viewModel.selectedBook = viewModel.books.firstIndex(of: book) ?? 0
+                                    viewModel.filterSongs(book: book.bookId)
+                                }
+                            )
+
+                            SongsList(
+                                viewModel: viewModel,
+                                songs: viewModel.filtered,
+                                editMode: $editMode,
+                                selectedIDs: $selectedIDs
+                            )
                         }
-                    )
-
-                    SongsList(
-                        viewModel: viewModel,
-                        songs: viewModel.filtered,
-                        editMode: $editMode,
-                        selectedIDs: $selectedIDs
-                    )
+                        .onAppear {
+                            self.scrollViewProxy = proxy
+                        }
+                    }
+                    .coordinateSpace(name: scrollSpace)
                 }
 
                 if viewModel.isProUser && !isEditing {
-                    Button {
-                        searchByNo = true
-                        searchQry = ""
-                        viewModel.searchSongs(qry: "", byNo: true)
-                    } label: {
-                        Image(systemName: "circle.grid.3x3.fill")
-                            .font(.title.weight(.semibold))
-                            .padding()
-                            .foregroundColor(.onPrimaryContainer)
-                            .background(.primaryContainer)
-                            .clipShape(Circle())
-                            .shadow(radius: 4, x: 0, y: 4)
+                    VStack(alignment: .trailing, spacing: 10) {
+                        if !isAtTop {
+                            ScrollToTopButton {
+                                withAnimation {
+                                    scrollToTop()
+                                }
+                            }
+                            .transition(.opacity)
+                        }
+
+                        SearchByNoFAB(
+                            onClick: {
+                                searchByNo = true
+                                searchQry = ""
+                                viewModel.searchSongs(qry: "", byNo: true)
+                            },
+                            expanded: isAtTop
+                        )
                     }
+                    .animation(.easeInOut(duration: 0.2), value: isAtTop)
                     .padding()
                     
                     if searchByNo {
@@ -102,6 +127,12 @@ struct HomeSearch: View {
             .homeToolbar(viewModel: viewModel, actions: isEditing ? [] : [.drafts, .more])
         }
     }
+    
+    private func scrollToTop() {
+        withAnimation(.easeInOut(duration: 0.3)) {
+            scrollViewProxy?.scrollTo("top", anchor: .top)
+        }
+    }
 }
 
 struct HomeSearchMock: View {
@@ -139,12 +170,9 @@ struct HomeSearchMock: View {
                 }
                 .padding()
                 DialPad(
-                    onNumberClick: { num in
-                    },
-                    onBackspaceClick: {
-                    },
-                    onSearchClick: {
-                    }
+                    onNumberClick: { num in },
+                    onBackspaceClick: { },
+                    onSearchClick: { }
                 )
             }
         }

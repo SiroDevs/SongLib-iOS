@@ -12,13 +12,15 @@ struct HomeToolbarAction: OptionSet {
 
     static let drafts = HomeToolbarAction(rawValue: 1 << 0)
     static let more = HomeToolbarAction(rawValue: 1 << 1)
+    static let add = HomeToolbarAction(rawValue: 1 << 2)
 
-    static let all: HomeToolbarAction = [.drafts, .more]
+    static let all: HomeToolbarAction = [.drafts, .more, .add]
 }
 
 private struct HomeTopBarActions: ViewModifier {
     @ObservedObject var viewModel: HomeViewModel
     let actions: HomeToolbarAction
+    var onAdd: (() -> Void)? = nil
 
     @State private var showDrafts = false
     @State private var showHowItWorks = false
@@ -28,6 +30,14 @@ private struct HomeTopBarActions: ViewModifier {
         content
             .toolbar {
                 ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    if actions.contains(.add) {
+                        Button {
+                            onAdd?()
+                        } label: {
+                            Image(systemName: "plus")
+                        }
+                    }
+
                     if actions.contains(.drafts) {
                         Button {
                             showDrafts = true
@@ -71,7 +81,11 @@ private struct HomeTopBarActions: ViewModifier {
 }
 
 extension View {
-    func homeToolbar(viewModel: HomeViewModel, actions: HomeToolbarAction = .more) -> some View {
-        modifier(HomeTopBarActions(viewModel: viewModel, actions: actions))
+    func homeToolbar(
+        viewModel: HomeViewModel,
+        actions: HomeToolbarAction = .more,
+        onAdd: (() -> Void)? = nil
+    ) -> some View {
+        modifier(HomeTopBarActions(viewModel: viewModel, actions: actions, onAdd: onAdd))
     }
 }

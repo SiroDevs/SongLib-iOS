@@ -60,15 +60,6 @@ struct HomeListings: View {
                         }
                     }
                 }
-                if !isEditing {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Button {
-                            checkAndHandleNewListing()
-                        } label: {
-                            Image(systemName: "plus")
-                        }
-                    }
-                }
                 if isEditing {
                     ToolbarItemGroup(placement: .bottomBar) {
                         Button(role: .destructive) {
@@ -89,7 +80,11 @@ struct HomeListings: View {
                     }
                 }
             }
-            .homeToolbar(viewModel: viewModel, actions: isEditing ? [] : .more)
+            .homeToolbar(
+                viewModel: viewModel,
+                actions: isEditing ? [] : [.add, .more],
+                onAdd: checkAndHandleNewListing
+            )
             .toolbar(isEditing ? .hidden : .visible, for: .tabBar)
             .alert("New Listing", isPresented: $showNewListingAlert) {
                 newListingAlertContent
@@ -162,7 +157,6 @@ struct HomeListings: View {
         }
     }
 }
-
 
 struct HomeListingsMock: View {
     @State private var showNewListingAlert = false
