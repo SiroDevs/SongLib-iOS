@@ -15,15 +15,18 @@ struct DialPad: View {
     private let dialPadItems: [[Any]] = {
         if UIDevice.current.userInterfaceIdiom == .pad {
             return [
-                ["1", "2", "3", "4", "5", "6"],
-                ["7", "8", "9", "0", ("delete.left", { }), ("checkmark", { })]
+                ["4", "5", "6", "7", "8", "9"],
+                ["3", "2", "1", "0",
+                 ("delete.left", { }),
+                 ("checkmark", { })]
             ]
         } else {
             return [
-                ["1", "2", "3"],
-                ["4", "5", "6"],
-                ["7", "8", "9"],
-                ["0", ("delete.left", { }), ("checkmark", { })]
+                ["6", "7", "8", "9"],
+                ["2", "3", "4", "5"],
+                ["1", "0",
+                 ("delete.left", { }),
+                 ("checkmark", { })]
             ]
         }
     }()
@@ -94,4 +97,16 @@ struct DialIconButton: View {
                 .stroke(.primary1, lineWidth: 2)
         )
     }
+}
+
+//#Preview {
+//    DialPad(
+//        onNumberClick: {_ in },
+//        onBackspaceClick: {},
+//        onSearchClick: {}
+//    )
+//}
+
+#Preview {
+    HomeSearchMock()
 }

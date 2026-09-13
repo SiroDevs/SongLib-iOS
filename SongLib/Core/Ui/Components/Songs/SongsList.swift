@@ -13,7 +13,38 @@ struct SongsList: View {
     let songs: [Song]
     @Binding var editMode: EditMode
     @Binding var selectedIDs: Set<Int>
+    /// Written to as the internal `List` scrolls - `true` while pinned to
+    /// the top. Defaults to an inert `.constant(true)` so existing callers
+    /// (HomeLikes) don't need to pass anything.
+    @Binding var isAtTop: Bool
+    /// Set by this view (once its `ScrollViewReader` is available) to a
+    /// closure that scrolls the list back to the top - call it from a
+    /// parent's "scroll to top" button.
+    @Binding var scrollToTopAction: (() -> Void)?
 
+    init(
+        viewModel: HomeViewModel,
+        songs: [Song],
+        editMode: Binding<EditMode>,
+        selectedIDs: Binding<Set<Int>>,
+        isAtTop: Binding<Bool> = .constant(true),
+        scrollToTopAction: Binding<(() -> Void)?> = .constant(nil)
+    ) {
+        self.viewModel = viewModel
+        self.songs = songs
+        self._editMode = editMode
+        self._selectedIDs = selectedIDs
+        self._isAtTop = isAtTop
+        self._scrollToTopAction = scrollToTopAction
+    }
+
+    /// Named coordinate space the top marker row measures itself against -
+    /// private to this instance's `List`, so nesting multiple `SongsList`s
+    /// (unlikely, but safe) wouldn't collide.
+    private let scrollSpace = "songsListScroll"
+
+    /// Song being routed through the single-song "Add to Listing" swipe
+    /// action (as opposed to the batch one on the selection bottom bar).
     @State private var selectedSong: Song?
     @State private var showBatchListingSheet = false
 
@@ -30,59 +61,79 @@ struct SongsList: View {
 
     var body: some View {
         ZStack {
-            List(selection: $selectedIDs) {
-                ForEach(songs) { song in
-                    NavigationLink(destination: PresenterView(song: song, songs: songs)) {
-                        SongItem(
-                            song: song,
-                            height: 50,
-                            isSelected: selectedIDs.contains(song.id),
-                            isSearching: false
-                        )
-                    }
-                    .listRowInsets(EdgeInsets())
-                    .listRowSeparatorTint(Color("outline").opacity(0.2))
-                    .swipeActions(edge: .leading, allowsFullSwipe: false) {
-                        Button {
-                            likeSong(song: song)
-                        } label: {
-                            Label(
-                                song.liked ? "Unlike" : "Like",
-                                systemImage: song.liked ? "heart.slash" : "heart.fill"
+            ScrollViewReader { proxy in
+                List(selection: $selectedIDs) {
+                    Color.clear
+                        .frame(height: 0)
+                        .listRowInsets(EdgeInsets())
+                        .listRowSeparator(.hidden)
+                        .id("top")
+                        .trackScrollOffset(coordinateSpace: scrollSpace) { offset in
+                            isAtTop = offset >= -5
+                        }
+
+                    ForEach(songs) { song in
+                        NavigationLink(destination: PresenterView(song: song, songs: songs)) {
+                            SongItem(
+                                song: song,
+                                height: 50,
+                                isSelected: selectedIDs.contains(song.id),
+                                isSearching: false
                             )
                         }
-                        .tint(.primary1)
-
-                        ShareLink(item: SongUtils.shareText(song: song)) {
-                            Label("Share", systemImage: "square.and.arrow.up")
-                        }
-                        .tint(.primaryContainer)
-                    }
-                    // Right swipe: add to a List, Copy (to Drafts).
-                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                        Button {
-                            copyToDrafts(song: song)
-                        } label: {
-                            Label("Copy", systemImage: "doc.on.doc")
-                        }
-                        .tint(.secondary1)
-
-                        Button {
-                            if viewModel.listings.isEmpty && !canCreateNewListing() {
-                                showProLimit = true
-                            } else {
-                                selectedSong = song
+                        .listRowInsets(EdgeInsets())
+                        .listRowSeparatorTint(Color("outline").opacity(0.2))
+                        // Left swipe: Like, Share.
+                        .swipeActions(edge: .leading, allowsFullSwipe: false) {
+                            Button {
+                                likeSong(song: song)
+                            } label: {
+                                Label(
+                                    song.liked ? "Unlike" : "Like",
+                                    systemImage: song.liked ? "heart.slash" : "heart.fill"
+                                )
                             }
-                        } label: {
-                            Label("List", systemImage: "text.badge.plus")
+                            .tint(.primary1)
+
+                            ShareLink(item: SongUtils.shareText(song: song)) {
+                                Label("Share", systemImage: "square.and.arrow.up")
+                            }
+                            .tint(.primaryContainer)
                         }
-                        .tint(.primaryContainer)
+                        // Right swipe: add to a List, Copy (to Drafts).
+                        .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                            Button {
+                                copyToDrafts(song: song)
+                            } label: {
+                                Label("Copy", systemImage: "doc.on.doc")
+                            }
+                            .tint(.secondary1)
+
+                            Button {
+                                if viewModel.listings.isEmpty && !canCreateNewListing() {
+                                    showProLimit = true
+                                } else {
+                                    selectedSong = song
+                                }
+                            } label: {
+                                Label("List", systemImage: "text.badge.plus")
+                            }
+                            .tint(.primaryContainer)
+                        }
+                    }
+                }
+                .coordinateSpace(name: scrollSpace)
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
+                .environment(\.editMode, $editMode)
+                .onAppear {
+                    scrollToTopAction = {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            proxy.scrollTo("top", anchor: .top)
+                        }
                     }
                 }
             }
-            .listStyle(.plain)
-            .scrollContentBackground(.hidden)
-            .environment(\.editMode, $editMode)
 
             if showToast {
                 ToastView(message: toastMessage)
@@ -90,6 +141,9 @@ struct SongsList: View {
                     .zIndex(1)
             }
         }
+        // Selection bottom bar - Like / Share / List - only while editing.
+        // Hidden entirely (not just empty) when not editing, so it doesn't
+        // reserve a blank bar.
         .toolbar {
             if isEditing {
                 ToolbarItemGroup(placement: .bottomBar) {
@@ -179,6 +233,7 @@ struct SongsList: View {
     }
 
     private func canCreateNewListing() -> Bool {
+        // Allow if user is Pro OR has 0 listings
         return viewModel.isProUser || viewModel.listings.count < 1
     }
 
