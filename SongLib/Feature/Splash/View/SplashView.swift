@@ -36,10 +36,10 @@ struct SplashView: View {
     
     @ViewBuilder
     private var destinationView: some View {
-        if viewModel.prefsRepo.isDataLoaded {
-            HomeView()
+        if !viewModel.prefsRepo.isDataSelected || viewModel.prefsRepo.selectAfresh {
+            SelectionView()
         } else {
-            SelectionView(startPhase: viewModel.prefsRepo.isDataSelected ? .songs : .books)
+            HomeView()
         }
     }
 }

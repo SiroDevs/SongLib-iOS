@@ -9,7 +9,7 @@ import SwiftUI
 import RevenueCatUI
 
 struct SettingsView: View {
-    @ObservedObject var viewModel: MainViewModel
+    @ObservedObject var viewModel: HomeViewModel
     @EnvironmentObject var themeManager: ThemeManager
     @State private var showPaywall: Bool = false
     @State private var showResetAlert: Bool = false
@@ -38,7 +38,9 @@ struct SettingsView: View {
                         PaywallView(displayCloseButton: true)
                     }
                     .navigationTitle("Settings")
+                    .navigationBarTitleDisplayMode(.inline)
                     .toolbarBackground(.regularMaterial, for: .navigationBar)
+                    .homeToolbar(viewModel: viewModel, actions: .more)
                 }
             }
         }

@@ -13,33 +13,36 @@ struct PresenterView: View {
         DiContainer.shared.resolve(ListingViewModel.self)
     }()
     let song: Song
-    
+    var songs: [Song] = []
+
     @StateObject private var selectedPage = Page.first()
-    @State private var showToast = false
+    @State private var toastMessage: String?
 
     var body: some View {
         ZStack {
-            NavigationStack {
-                stateContent
-            }
+            stateContent
 
-            if showToast {
-                let toastMessage = L10n.likedSong(for: song.title, isLiked: viewModel.isLiked)
-
+            if let toastMessage {
                 ToastView(message: toastMessage)
                     .transition(.move(edge: .bottom).combined(with: .opacity))
                     .zIndex(1)
             }
         }
-        .toolbar(.hidden, for: .tabBar)
-        .task { viewModel.loadSong(song: song) }
+        .task {
+            viewModel.loadSong(song: song, context: songs.isEmpty ? [song] : songs)
+        }
         .onChange(of: viewModel.uiState) { newState in
             if case .liked = newState {
-                showToast = true
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                    showToast = false
-                }
+                let likedTitle = viewModel.currentSong?.title ?? song.title
+                showToast(L10n.likedSong(for: likedTitle, isLiked: viewModel.isLiked))
             }
+        }
+    }
+
+    private func showToast(_ message: String) {
+        toastMessage = message
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            toastMessage = nil
         }
     }
 
@@ -51,16 +54,17 @@ struct PresenterView: View {
                     .scaleEffect(5)
                     .tint(.onPrimary)
                 
-            case .loaded, .liked:
+            case .loaded, .liked, .saved:
                 PresenterContent(
                     viewModel: viewModel,
                     selected: selectedPage,
-                    song: song
+                    song: song,
+                    onToast: showToast
                 )
 
             case .error(let msg):
                 ErrorView(message: msg) {
-                    Task { viewModel.loadSong(song: song) }
+                    Task { viewModel.loadSong(song: song, context: songs.isEmpty ? [song] : songs) }
                 }
 
             default:

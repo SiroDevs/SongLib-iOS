@@ -8,23 +8,25 @@
 import Foundation
 import SwiftUI
 
-final class MainViewModel: ObservableObject {
+final class HomeViewModel: ObservableObject {
     private let prefsRepo: PrefsRepo
     private let songbkRepo: SongBookRepoProtocol
     private let listingRepo: ListingRepoProtocol
     private let reviewRepo: ReviewReqRepoProtocol
     private let subsRepo: SubsRepoProtocol
+    private let draftRepo: DraftRepoProtocol
     
     @Published var isProUser: Bool = false
     @Published var horizontalSlides: Bool = false
     @Published var showReviewPrompt: Bool = false
+    @Published var isDatabaseReady: Bool = false
     
     @Published var books: [Book] = []
     @Published var songs: [Song] = []
     @Published var likes: [Song] = []
     @Published var filtered: [Song] = []
     @Published var listings: [Listing] = []
-    @Published var selectedBook: Int = 0
+    @Published var selectedBook: Int = -1
     @Published var uiState: UiState = .idle
 
     init(
@@ -32,13 +34,15 @@ final class MainViewModel: ObservableObject {
         songbkRepo: SongBookRepoProtocol,
         listingRepo: ListingRepoProtocol,
         reviewRepo: ReviewReqRepoProtocol,
-        subsRepo: SubsRepoProtocol
+        subsRepo: SubsRepoProtocol,
+        draftRepo: DraftRepoProtocol
     ) {
         self.prefsRepo = prefsRepo
         self.songbkRepo = songbkRepo
         self.listingRepo = listingRepo
         self.reviewRepo = reviewRepo
         self.subsRepo = subsRepo
+        self.draftRepo = draftRepo
     }
     
     private func validateSubscription(isOnline: Bool) async throws {
@@ -72,6 +76,7 @@ final class MainViewModel: ObservableObject {
     
     func fetchData() {
         uiState = .loading("")
+        isDatabaseReady = prefsRepo.isDataLoaded
         Task { @MainActor in
             try await validateSubscription(isOnline: false)
             horizontalSlides = prefsRepo.horizontalSlides
@@ -79,6 +84,36 @@ final class MainViewModel: ObservableObject {
             songs = songbkRepo.fetchLocalSongs()
             listings = listingRepo.fetchListings(for: 0)
             uiState = .fetched
+
+            if !prefsRepo.isDataLoaded {
+                await syncSongsInBackground()
+            } else {
+                isDatabaseReady = true
+            }
+        }
+    }
+
+    private func syncSongsInBackground() async {
+        do {
+            let fetchedSongs = try await songbkRepo.fetchRemoteSongs(for: prefsRepo.selectedBooks)
+            for song in fetchedSongs {
+                songbkRepo.saveSong(song)
+            }
+            await MainActor.run {
+                self.songs = songbkRepo.fetchLocalSongs()
+                self.prefsRepo.isDataLoaded = true
+                if selectedBook == -1 {
+                    self.showAllSongs()
+                } else if books.indices.contains(selectedBook) {
+                    self.filterSongs(book: books[selectedBook].bookId)
+                }
+                self.isDatabaseReady = true
+            }
+        } catch {
+            print("❌ Background song sync failed: \(error)")
+            await MainActor.run {
+                self.isDatabaseReady = true
+            }
         }
     }
     
@@ -86,6 +121,17 @@ final class MainViewModel: ObservableObject {
         Task {
             await MainActor.run {
                 filtered = songs.filter { $0.book == book }
+                likes = songs.filter { $0.liked }
+                uiState = .filtered
+            }
+        }
+    }
+
+    /// Shows every song regardless of book - the "All" pill in BooksList.
+    func showAllSongs() {
+        Task {
+            await MainActor.run {
+                filtered = songs
                 likes = songs.filter { $0.liked }
                 uiState = .filtered
             }
@@ -100,6 +146,22 @@ final class MainViewModel: ObservableObject {
     func likeSong(song: Song) {
         songbkRepo.likeSong(song)
         uiState = .filtered
+    }
+
+    func likeSongs(_ songs: [Song]) {
+        for song in songs {
+            songbkRepo.likeSong(song)
+        }
+        uiState = .filtered
+    }
+
+    func copyToDrafts(song: Song) {
+        draftRepo.saveDraft(
+            title: SongUtils.songItemTitle(number: song.songNo, title: song.title),
+            content: song.content,
+            songNo: song.songNo,
+            book: song.book
+        )
     }
     
     func saveListing(_ parent: Int, title: String) {
@@ -120,6 +182,16 @@ final class MainViewModel: ObservableObject {
     
     func deleteListing(_ listing: Int) {
         listingRepo.deleteListing(with: listing)
+        Task { @MainActor in
+            listings = listingRepo.fetchListings(for: 0)
+            uiState = .filtered
+        }
+    }
+
+    func deleteListings(_ ids: Set<Int>) {
+        for id in ids {
+            listingRepo.deleteListing(with: id)
+        }
         Task { @MainActor in
             listings = listingRepo.fetchListings(for: 0)
             uiState = .filtered

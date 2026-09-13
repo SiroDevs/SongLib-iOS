@@ -40,7 +40,7 @@ final class DiContainer {
             { self.container.resolve(DraftsViewModel.self) },
             { self.container.resolve(SplashViewModel.self) },
             { self.container.resolve(SelectionViewModel.self) },
-            { self.container.resolve(MainViewModel.self) },
+            { self.container.resolve(HomeViewModel.self) },
             { self.container.resolve(ListingViewModel.self) },
         ]
 

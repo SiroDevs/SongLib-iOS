@@ -10,11 +10,17 @@ import SwiftUI
 struct BooksList: View {
     let books: [Book]
     let selectedBook: Int
-    let onSelect: (Book) -> Void
+    let onSelect: (Book?) -> Void
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack() {
+            HStack {
+                BookItem(
+                    text: "All",
+                    isSelected: selectedBook == -1,
+                    onPressed: { onSelect(nil) }
+                )
+
                 ForEach(Array(books.enumerated()), id: \.1.bookId) { index, book in
                     BookItem(
                         text: book.title,
@@ -25,7 +31,7 @@ struct BooksList: View {
             }
         }
         .padding(.leading, 5)
-        .frame(height: 35)
+        .frame(height: 36)
     }
 }
 
@@ -36,28 +42,73 @@ struct SongsSearchBar: View {
     var onCancel: (() -> Void)?
     
     var body: some View {
-        HStack(alignment: .center) {
+        HStack(spacing: 5) {
+            HStack(spacing: 5) {
+                Image(systemName: "magnifyingglass")
+                    .foregroundColor(Color("onSurfaceVariant").opacity(0.6))
+
+                TextField("Search songs …", text: $text)
+                    .focused($isFocused)
+                    .submitLabel(.search)
+
+                if !text.isEmpty {
+                    Button(action: { text = "" }) {
+                        Image(systemName: "xmark.circle.fill")
+                            .foregroundColor(Color("onSurfaceVariant").opacity(0.5))
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                }
+            }
+            .padding(.horizontal, 5)
+            .padding(.vertical, 10)
+            .background(Color("surfaceVariant").opacity(0.5))
+            .cornerRadius(12)
+
             if isFocused {
-                Button(action: {
+                Button("Cancel") {
                     text = ""
                     isFocused = false
                     hideKeyboard()
                     onCancel?()
-                }) {
-                    Image(systemName: "chevron.backward")
-                        .font(.largeTitle)
-                        .foregroundColor(.onPrimaryContainer)
                 }
-                .padding(.bottom, 5)
+                .font(.subheadline)
+                .foregroundColor(.primary1)
+                .transition(.move(edge: .trailing).combined(with: .opacity))
             }
-            
-            TextField("Search for songs ...", text: $text) .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding(.bottom, 15)
-                .padding(.top, 7)
-                .focused($isFocused)
         }
         .padding(.horizontal)
-        .animation(.easeInOut, value: isFocused)
+        .animation(.easeInOut(duration: 0.2), value: isFocused)
+    }
+}
+
+struct ListingsScrollView: View {
+    let listings: [Listing]
+    @Binding var editMode: EditMode
+    @Binding var selectedIDs: Set<Int>
+    let onDelete: (Int) -> Void
+
+    var body: some View {
+        List(selection: $selectedIDs) {
+            ForEach(listings) { listing in
+                NavigationLink {
+                    ListingView(listing: listing)
+                } label: {
+                    ListingItem(listing: listing)
+                }
+                .listRowInsets(EdgeInsets())
+                .swipeActions(edge: .trailing, allowsFullSwipe: true) {
+                    Button(role: .destructive) {
+                        onDelete(listing.id)
+                    } label: {
+                        Label("Delete", systemImage: "trash")
+                    }
+                }
+            }
+        }
+        .listStyle(.plain)
+        .scrollContentBackground(.hidden)
+        .background(.surface)
+        .environment(\.editMode, $editMode)
     }
 }
 

@@ -22,7 +22,7 @@ struct DraftPresenterView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 20) {
-                PresenterTabs(verses: verses, selected: selectedPage)
+                PresenterTabs(verses: verses, indicators: indicators, songTitle: title, selected: selectedPage)
                     .frame(maxHeight: .infinity)
 
                 PresenterIndicators(indicators: indicators, selected: selectedPage)

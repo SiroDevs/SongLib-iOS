@@ -135,13 +135,14 @@ struct DependencyMap {
             )
         }.inObjectScope(.container)
         
-        container.register(MainViewModel.self) { resolver in
-            MainViewModel(
+        container.register(HomeViewModel.self) { resolver in
+            HomeViewModel(
                 prefsRepo: resolver.resolve(PrefsRepo.self)!,
                 songbkRepo: resolver.resolve(SongBookRepoProtocol.self)!,
                 listingRepo: resolver.resolve(ListingRepoProtocol.self)!,
                 reviewRepo: resolver.resolve(ReviewReqRepoProtocol.self)!,
                 subsRepo: resolver.resolve(SubsRepoProtocol.self)!,
+                draftRepo: resolver.resolve(DraftRepoProtocol.self)!,
             )
         }.inObjectScope(.container)
         
@@ -151,6 +152,7 @@ struct DependencyMap {
                 songbkRepo: resolver.resolve(SongBookRepoProtocol.self)!,
                 listRepo: resolver.resolve(ListingRepoProtocol.self)!,
                 subsRepo: resolver.resolve(SubsRepoProtocol.self)!,
+                draftRepo: resolver.resolve(DraftRepoProtocol.self)!,
             )
         }.inObjectScope(.container)
         

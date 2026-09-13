@@ -6,46 +6,43 @@
 //
 
 import SwiftUI
-import Lottie
 
 struct LoadingState: View {
     var title: String = ""
-    var fileName: String = "loading-hand"
     var showProgress: Bool = false
     var progressValue: Int = 0
 
     var body: some View {
-        VStack(spacing: 24) {
-            LottieView(name: fileName).frame(width: 300, height: 300)
-
-            Text(title)
-                .font(.system(size: 25, weight: .bold))
-                .foregroundColor(.onPrimaryContainer)
+        VStack(spacing: 20) {
+            if !title.isEmpty {
+                Text(title)
+                    .font(.system(size: 20, weight: .bold))
+                    .foregroundColor(.onPrimaryContainer)
+                    .padding(.top, 12)
+            }
 
             if showProgress {
-                VStack(spacing: 8) {
-                    HStack {
-                        ProgressView(value: Double(progressValue) / 100)
-                            .progressViewStyle(LinearProgressViewStyle(tint: .onPrimary))
-                            .frame(height: 20)
-                        Spacer().frame(width: 8)
-                        Text("\(progressValue) %")
-                            .font(.system(size: 20, weight: .bold))
-                            .foregroundColor(.onPrimaryContainer)
-                    }
+                HStack {
+                    ProgressView(value: Double(progressValue) / 100)
+                        .progressViewStyle(LinearProgressViewStyle(tint: .onPrimary))
+                        .frame(height: 20)
+                    Spacer().frame(width: 8)
+                    Text("\(progressValue) %")
+                        .font(.system(size: 18, weight: .bold))
+                        .foregroundColor(.onPrimaryContainer)
                 }
                 .padding(.horizontal)
             }
+
+            SongListSkeleton()
+                .padding(.top, showProgress || !title.isEmpty ? 8 : 24)
         }
-        .padding(20)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .background(.surface)
         .ignoresSafeArea()
     }
 }
 
 #Preview {
-    LoadingState(
-        title: "Fetching data ...",
-        fileName: "opener-loading",
-    )
+    LoadingState(title: "Fetching data ...")
 }
