@@ -93,7 +93,7 @@ struct HomeSearch: View {
                     }
                 }
             }
-            .toolbar(isEditing ? .hidden : .visible, for: .tabBar)
+            .toolbar(isEditing ? .hidden : .automatic, for: .tabBar)
             .homeToolbar(viewModel: viewModel, actions: isEditing ? [] : [.drafts, .more])
             .sheet(isPresented: $searchByNo) {
                 VStack(spacing: 0) {

@@ -65,7 +65,7 @@ struct HomeLikes: View {
                     }
                 }
             }
-            .toolbar(isEditing ? .hidden : .visible, for: .tabBar)
+            .toolbar(isEditing ? .hidden : .automatic, for: .tabBar)
             .homeToolbar(viewModel: viewModel, actions: isEditing ? [] : .more)
         }
     }

@@ -46,10 +46,20 @@ struct SongsList: View {
         songs.filter { selectedIDs.contains($0.id) }
     }
 
+    // Only feed List a live selection binding while actually editing.
+    // Otherwise, tapping a NavigationLink row to browse would also mark
+    // that row as "selected", leaving it highlighted when you pop back.
+    private var rowSelection: Binding<Set<Int>> {
+        Binding(
+            get: { isEditing ? selectedIDs : [] },
+            set: { newValue in if isEditing { selectedIDs = newValue } }
+        )
+    }
+
     var body: some View {
         ZStack {
             ScrollViewReader { proxy in
-                List(selection: $selectedIDs) {
+                List(selection: rowSelection) {
                     ForEach(Array(songs.enumerated()), id: \.element.id) { index, song in
                         NavigationLink(destination: PresenterView(song: song, songs: songs)) {
                             SongItem(

@@ -87,8 +87,20 @@ struct ListingsScrollView: View {
     @Binding var selectedIDs: Set<Int>
     let onDelete: (Int) -> Void
 
+    private var isEditing: Bool { editMode == .active }
+
+    // Only feed List a live selection binding while actually editing.
+    // Otherwise, tapping a NavigationLink row to browse would also mark
+    // that row as "selected", leaving it highlighted when you pop back.
+    private var rowSelection: Binding<Set<Int>> {
+        Binding(
+            get: { isEditing ? selectedIDs : [] },
+            set: { newValue in if isEditing { selectedIDs = newValue } }
+        )
+    }
+
     var body: some View {
-        List(selection: $selectedIDs) {
+        List(selection: rowSelection) {
             ForEach(listings) { listing in
                 NavigationLink {
                     ListingView(listing: listing)

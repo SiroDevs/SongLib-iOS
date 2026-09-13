@@ -85,7 +85,7 @@ struct HomeListings: View {
                 actions: isEditing ? [] : [.add, .more],
                 onAdd: checkAndHandleNewListing
             )
-            .toolbar(isEditing ? .hidden : .visible, for: .tabBar)
+            .toolbar(isEditing ? .hidden : .automatic, for: .tabBar)
             .alert("New Listing", isPresented: $showNewListingAlert) {
                 newListingAlertContent
             } message: {
