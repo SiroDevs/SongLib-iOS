@@ -13,13 +13,7 @@ struct SongsList: View {
     let songs: [Song]
     @Binding var editMode: EditMode
     @Binding var selectedIDs: Set<Int>
-    /// Written to as the internal `List` scrolls - `true` while pinned to
-    /// the top. Defaults to an inert `.constant(true)` so existing callers
-    /// (HomeLikes) don't need to pass anything.
     @Binding var isAtTop: Bool
-    /// Set by this view (once its `ScrollViewReader` is available) to a
-    /// closure that scrolls the list back to the top - call it from a
-    /// parent's "scroll to top" button.
     @Binding var scrollToTopAction: (() -> Void)?
 
     init(
@@ -38,8 +32,6 @@ struct SongsList: View {
         self._scrollToTopAction = scrollToTopAction
     }
 
-    /// Song being routed through the single-song "Add to Listing" swipe
-    /// action (as opposed to the batch one on the selection bottom bar).
     @State private var selectedSong: Song?
     @State private var showBatchListingSheet = false
 
@@ -63,16 +55,11 @@ struct SongsList: View {
                             SongItem(
                                 song: song,
                                 height: 50,
-                                isSelected: selectedIDs.contains(song.id),
+                                isSelected: false,//selectedIDs.contains(song.id),
                                 isSearching: false
                             )
                         }
                         .id(index == 0 ? "top" : nil)
-                        // First row's visibility (not a GeometryReader offset
-                        // read, which doesn't play nicely with `List` and was
-                        // reporting a stale/incorrect offset) drives `isAtTop`
-                        // - reliable whether the row scrolls off the top or
-                        // the whole list is replaced by a shorter one.
                         .onAppear {
                             if index == 0 { isAtTop = true }
                         }
@@ -81,7 +68,6 @@ struct SongsList: View {
                         }
                         .listRowInsets(EdgeInsets())
                         .listRowSeparatorTint(Color("outline").opacity(0.2))
-                        // Left swipe: Like, Share.
                         .swipeActions(edge: .leading, allowsFullSwipe: false) {
                             Button {
                                 likeSong(song: song)
@@ -98,7 +84,6 @@ struct SongsList: View {
                             }
                             .tint(.primaryContainer)
                         }
-                        // Right swipe: add to a List, Copy (to Drafts).
                         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                             Button {
                                 copyToDrafts(song: song)
@@ -138,9 +123,6 @@ struct SongsList: View {
                     .zIndex(1)
             }
         }
-        // Selection bottom bar - Like / Share / List - only while editing.
-        // Hidden entirely (not just empty) when not editing, so it doesn't
-        // reserve a blank bar.
         .toolbar {
             if isEditing {
                 ToolbarItemGroup(placement: .bottomBar) {
@@ -230,7 +212,6 @@ struct SongsList: View {
     }
 
     private func canCreateNewListing() -> Bool {
-        // Allow if user is Pro OR has 0 listings
         return viewModel.isProUser || viewModel.listings.count < 1
     }
 

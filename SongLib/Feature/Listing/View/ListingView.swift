@@ -22,9 +22,7 @@ struct ListingView: View {
 
     var body: some View {
         ZStack {
-            NavigationStack {
-                stateContent
-            }
+            stateContent
             if showToast {
                 ToastView(message: toastMessage)
                     .transition(.move(edge: .bottom).combined(with: .opacity))

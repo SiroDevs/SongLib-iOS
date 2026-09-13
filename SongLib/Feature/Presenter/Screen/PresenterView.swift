@@ -20,9 +20,7 @@ struct PresenterView: View {
 
     var body: some View {
         ZStack {
-            NavigationStack {
-                stateContent
-            }
+            stateContent
 
             if let toastMessage {
                 ToastView(message: toastMessage)
@@ -30,7 +28,6 @@ struct PresenterView: View {
                     .zIndex(1)
             }
         }
-        .toolbar(.hidden, for: .tabBar)
         .task {
             viewModel.loadSong(song: song, context: songs.isEmpty ? [song] : songs)
         }
