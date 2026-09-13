@@ -7,10 +7,6 @@
 
 import SwiftUI
 
-/// Search-by-number FAB, same icon this used to be a plain `Button` for -
-/// now an "extended FAB": it shows a label at the top of the list and
-/// collapses down to just the icon once scrolling starts, so it doesn't
-/// crowd the song list while reading.
 struct SearchByNoFAB: View {
     let onClick: () -> Void
     var expanded: Bool = true
@@ -22,7 +18,7 @@ struct SearchByNoFAB: View {
                     .font(.title3.weight(.semibold))
 
                 if expanded {
-                    Text("Search by No.")
+                    Text("Search by Number")
                         .font(.subheadline.weight(.semibold))
                         .lineLimit(1)
                         .transition(.opacity.combined(with: .move(edge: .trailing)))

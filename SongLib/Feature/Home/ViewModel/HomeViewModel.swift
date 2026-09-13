@@ -26,7 +26,7 @@ final class HomeViewModel: ObservableObject {
     @Published var likes: [Song] = []
     @Published var filtered: [Song] = []
     @Published var listings: [Listing] = []
-    @Published var selectedBook: Int = 0
+    @Published var selectedBook: Int = -1
     @Published var uiState: UiState = .idle
 
     init(
@@ -102,7 +102,9 @@ final class HomeViewModel: ObservableObject {
             await MainActor.run {
                 self.songs = songbkRepo.fetchLocalSongs()
                 self.prefsRepo.isDataLoaded = true
-                if books.indices.contains(selectedBook) {
+                if selectedBook == -1 {
+                    self.showAllSongs()
+                } else if books.indices.contains(selectedBook) {
                     self.filterSongs(book: books[selectedBook].bookId)
                 }
                 self.isDatabaseReady = true
@@ -119,6 +121,17 @@ final class HomeViewModel: ObservableObject {
         Task {
             await MainActor.run {
                 filtered = songs.filter { $0.book == book }
+                likes = songs.filter { $0.liked }
+                uiState = .filtered
+            }
+        }
+    }
+
+    /// Shows every song regardless of book - the "All" pill in BooksList.
+    func showAllSongs() {
+        Task {
+            await MainActor.run {
+                filtered = songs
                 likes = songs.filter { $0.liked }
                 uiState = .filtered
             }

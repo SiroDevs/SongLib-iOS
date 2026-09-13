@@ -10,11 +10,17 @@ import SwiftUI
 struct BooksList: View {
     let books: [Book]
     let selectedBook: Int
-    let onSelect: (Book) -> Void
+    let onSelect: (Book?) -> Void
 
     var body: some View {
         ScrollView(.horizontal, showsIndicators: false) {
-            HStack() {
+            HStack {
+                BookItem(
+                    text: "All",
+                    isSelected: selectedBook == -1,
+                    onPressed: { onSelect(nil) }
+                )
+
                 ForEach(Array(books.enumerated()), id: \.1.bookId) { index, book in
                     BookItem(
                         text: book.title,

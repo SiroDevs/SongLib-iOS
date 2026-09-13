@@ -29,6 +29,11 @@ struct HomeLikes: View {
                             books: viewModel.books,
                             selectedBook: viewModel.selectedBook,
                             onSelect: { book in
+                                guard let book else {
+                                    viewModel.selectedBook = -1
+                                    viewModel.showAllSongs()
+                                    return
+                                }
                                 viewModel.selectedBook = viewModel.books.firstIndex(of: book) ?? 0
                                 viewModel.filterSongs(book: book.bookId)
                             }

@@ -67,7 +67,11 @@ struct HomeView: View {
     
     private func handleStateChange(_ state: UiState) {
         if case .fetched = state {
-            viewModel.filterSongs(book: viewModel.books[viewModel.selectedBook].bookId)
+            if viewModel.selectedBook == -1 {
+                viewModel.showAllSongs()
+            } else if viewModel.books.indices.contains(viewModel.selectedBook) {
+                viewModel.filterSongs(book: viewModel.books[viewModel.selectedBook].bookId)
+            }
         }
     }
 }

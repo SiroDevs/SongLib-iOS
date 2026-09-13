@@ -36,6 +36,11 @@ struct HomeSearch: View {
                         books: viewModel.books,
                         selectedBook: viewModel.selectedBook,
                         onSelect: { book in
+                            guard let book else {
+                                viewModel.selectedBook = -1
+                                viewModel.showAllSongs()
+                                return
+                            }
                             viewModel.selectedBook = viewModel.books.firstIndex(of: book) ?? 0
                             viewModel.filterSongs(book: book.bookId)
                         }
@@ -71,26 +76,6 @@ struct HomeSearch: View {
                     }
                     .animation(.easeInOut(duration: 0.2), value: isAtTop)
                     .padding()
-
-                    if searchByNo {
-                        DialPad(
-                            onNumberClick: { num in
-                                searchQry += num
-                                viewModel.searchSongs(qry: searchQry, byNo: true)
-                            },
-                            onBackspaceClick: {
-                                if !searchQry.isEmpty {
-                                    searchQry.removeLast()
-                                    viewModel.searchSongs(qry: searchQry, byNo: true)
-                                }
-                            },
-                            onSearchClick: {
-                                viewModel.searchSongs(qry: searchQry, byNo: true)
-                                searchByNo = false
-                            }
-                        )
-                        .animation(.easeInOut, value: true)
-                    }
                 }
             }
             .navigationTitle(isEditing ? "\(selectedIDs.count) selected" : "SongLib")
@@ -110,6 +95,49 @@ struct HomeSearch: View {
             }
             .toolbar(isEditing ? .hidden : .visible, for: .tabBar)
             .homeToolbar(viewModel: viewModel, actions: isEditing ? [] : [.drafts, .more])
+            .sheet(isPresented: $searchByNo) {
+                VStack(spacing: 0) {
+                    HStack {
+                        Spacer()
+                        Text("Enter song number")
+                            .font(.title)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                    }
+                    .overlay(alignment: .trailing) {
+                        Button {
+                            searchByNo = false
+                        } label: {
+                            Image(systemName: "xmark")
+                                .font(.body.weight(.semibold))
+                                .foregroundColor(.secondary)
+                        }
+                        .padding(.horizontal, 20)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 15)
+                    .padding(.bottom, 40)
+
+                    DialPad(
+                        onNumberClick: { num in
+                            searchQry += num
+                            viewModel.searchSongs(qry: searchQry, byNo: true)
+                        },
+                        onBackspaceClick: {
+                            if !searchQry.isEmpty {
+                                searchQry.removeLast()
+                                viewModel.searchSongs(qry: searchQry, byNo: true)
+                            }
+                        },
+                        onSearchClick: {
+                            viewModel.searchSongs(qry: searchQry, byNo: true)
+                            searchByNo = false
+                        },
+                    )
+                }
+                .presentationDetents([.height(430)])
+                .presentationDragIndicator(.visible)
+            }
         }
     }
 }

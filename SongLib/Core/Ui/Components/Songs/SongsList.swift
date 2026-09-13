@@ -38,11 +38,6 @@ struct SongsList: View {
         self._scrollToTopAction = scrollToTopAction
     }
 
-    /// Named coordinate space the top marker row measures itself against -
-    /// private to this instance's `List`, so nesting multiple `SongsList`s
-    /// (unlikely, but safe) wouldn't collide.
-    private let scrollSpace = "songsListScroll"
-
     /// Song being routed through the single-song "Add to Listing" swipe
     /// action (as opposed to the batch one on the selection bottom bar).
     @State private var selectedSong: Song?
@@ -63,16 +58,7 @@ struct SongsList: View {
         ZStack {
             ScrollViewReader { proxy in
                 List(selection: $selectedIDs) {
-                    Color.clear
-                        .frame(height: 0)
-                        .listRowInsets(EdgeInsets())
-                        .listRowSeparator(.hidden)
-                        .id("top")
-                        .trackScrollOffset(coordinateSpace: scrollSpace) { offset in
-                            isAtTop = offset >= -5
-                        }
-
-                    ForEach(songs) { song in
+                    ForEach(Array(songs.enumerated()), id: \.element.id) { index, song in
                         NavigationLink(destination: PresenterView(song: song, songs: songs)) {
                             SongItem(
                                 song: song,
@@ -80,6 +66,18 @@ struct SongsList: View {
                                 isSelected: selectedIDs.contains(song.id),
                                 isSearching: false
                             )
+                        }
+                        .id(index == 0 ? "top" : nil)
+                        // First row's visibility (not a GeometryReader offset
+                        // read, which doesn't play nicely with `List` and was
+                        // reporting a stale/incorrect offset) drives `isAtTop`
+                        // - reliable whether the row scrolls off the top or
+                        // the whole list is replaced by a shorter one.
+                        .onAppear {
+                            if index == 0 { isAtTop = true }
+                        }
+                        .onDisappear {
+                            if index == 0 { isAtTop = false }
                         }
                         .listRowInsets(EdgeInsets())
                         .listRowSeparatorTint(Color("outline").opacity(0.2))
@@ -122,7 +120,6 @@ struct SongsList: View {
                         }
                     }
                 }
-                .coordinateSpace(name: scrollSpace)
                 .listStyle(.plain)
                 .scrollContentBackground(.hidden)
                 .environment(\.editMode, $editMode)
