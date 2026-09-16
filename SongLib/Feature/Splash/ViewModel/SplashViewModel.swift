@@ -42,6 +42,7 @@ final class SplashViewModel: ObservableObject {
         return try await withCheckedThrowingContinuation { continuation in
             subsRepo.isProUser(isOnline: isOnline) { isActive in
                 Task { @MainActor in
+                    self.prefsRepo.isProUser = isActive
                     continuation.resume()
                 }
             }

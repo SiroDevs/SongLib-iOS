@@ -28,6 +28,12 @@ struct PrefConstants {
     static let isProUser = "isProUserKey"
     static let selectAfresh = "selectAfreshKey"
     static let lastAppOpenTime = "lastAppOpenTimeKey"
+
+    // Free-tier usage counters for features gated behind a limited
+    // number of uses before requiring a PRO upgrade - see `ProFeature`.
+    static let searchByNoUses = "searchByNoUsesKey"
+    static let songShareUses = "songShareUsesKey"
+    static let verseShareUses = "verseShareUsesKey"
 }
 
 struct AppSecrets {

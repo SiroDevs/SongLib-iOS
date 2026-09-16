@@ -7,6 +7,23 @@
 
 import Foundation
 
+/// Features that free (non-Pro) users get a limited number of uses of
+/// before being asked to upgrade. Each case tracks its own use count
+/// independently, via `PrefsRepo`. See `ProFeatureGateModel`.
+enum ProFeature {
+    case searchByNumber
+    case songSharing
+    case verseSharing
+
+    fileprivate var prefsKey: String {
+        switch self {
+        case .searchByNumber: return PrefConstants.searchByNoUses
+        case .songSharing: return PrefConstants.songShareUses
+        case .verseSharing: return PrefConstants.verseShareUses
+        }
+    }
+}
+
 protocol PrefsRepoProtocol {
     var installDate: Date { get set }
     var reviewRequested: Bool { get set }
@@ -18,11 +35,21 @@ protocol PrefsRepoProtocol {
     var horizontalSlides: Bool { get set }
     var selectAfresh: Bool { get set }
     var lastAppOpenTime: TimeInterval { get set }
-    
+
+    /// Cached locally so screens that don't own a subscription-checking
+    /// view model (e.g. `VerseShareButtons`) can still read it
+    /// synchronously, mirroring how `horizontalSlides` is read directly
+    /// in `PresenterTabs`. Kept in sync by whichever view model last
+    /// validated the subscription with `SubsRepo`.
+    var isProUser: Bool { get set }
+
     func resetPrefs()
     func hasTimeExceeded(hours: Int) -> Bool
     func updateAppOpenTime()
     func getTimeSinceLastOpen() -> TimeInterval
+
+    func proFeatureUseCount(_ feature: ProFeature) -> Int
+    func recordProFeatureUse(_ feature: ProFeature)
 }
 
 class PrefsRepo: PrefsRepoProtocol {
@@ -80,6 +107,19 @@ class PrefsRepo: PrefsRepoProtocol {
     var lastAppOpenTime: TimeInterval {
         get { userDefaults.double(forKey: PrefConstants.lastAppOpenTime) }
         set { userDefaults.set(newValue, forKey: PrefConstants.lastAppOpenTime) }
+    }
+
+    var isProUser: Bool {
+        get { userDefaults.bool(forKey: PrefConstants.isProUser) }
+        set { userDefaults.set(newValue, forKey: PrefConstants.isProUser) }
+    }
+
+    func proFeatureUseCount(_ feature: ProFeature) -> Int {
+        userDefaults.integer(forKey: feature.prefsKey)
+    }
+
+    func recordProFeatureUse(_ feature: ProFeature) {
+        userDefaults.set(proFeatureUseCount(feature) + 1, forKey: feature.prefsKey)
     }
     
     func hasTimeExceeded(hours: Int) -> Bool {

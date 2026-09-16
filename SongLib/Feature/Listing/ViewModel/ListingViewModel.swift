@@ -65,6 +65,7 @@ final class ListingViewModel: ObservableObject {
         subsRepo.isProUser(isOnline: isOnline) { [weak self] isActive in
             Task { @MainActor in
                 self?.isProUser = isActive
+                self?.prefsRepo.isProUser = isActive
             }
         }
     }

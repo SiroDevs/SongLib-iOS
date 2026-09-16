@@ -40,6 +40,12 @@ struct SongsList: View {
     @State private var showPaywall = false
     @State private var showProLimit = false
 
+    // Sharing a song's words and copying it to Drafts share one PRO
+    // usage allowance across every entry point on this screen.
+    @StateObject private var songSharingGate = ProFeatureGateModel(feature: .songSharing)
+    @State private var pendingShareText: String?
+    @State private var showShareSheet = false
+
     private var isEditing: Bool { editMode == .active }
 
     private var selectedSongs: [Song] {
@@ -89,14 +95,20 @@ struct SongsList: View {
                             }
                             .tint(.primary1)
 
-                            ShareLink(item: SongUtils.shareText(song: song)) {
+                            Button {
+                                songSharingGate.attemptUse {
+                                    shareSong(song)
+                                }
+                            } label: {
                                 Label("Share", systemImage: "square.and.arrow.up")
                             }
                             .tint(.primaryContainer)
                         }
                         .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                             Button {
-                                copyToDrafts(song: song)
+                                songSharingGate.attemptUse {
+                                    copyToDrafts(song: song)
+                                }
                             } label: {
                                 Label("Copy", systemImage: "doc.on.doc")
                             }
@@ -145,7 +157,13 @@ struct SongsList: View {
 
                     Spacer()
 
-                    ShareLink(item: singleSelectionShareText ?? "") {
+                    Button {
+                        guard let text = singleSelectionShareText else { return }
+                        songSharingGate.attemptUse {
+                            pendingShareText = text
+                            showShareSheet = true
+                        }
+                    } label: {
                         Label("Share", systemImage: "square.and.arrow.up")
                     }
                     .disabled(selectedIDs.count != 1)
@@ -214,6 +232,12 @@ struct SongsList: View {
         PaywallView(displayCloseButton: true)
         #endif
         }
+        .sheet(isPresented: $showShareSheet) {
+            if let pendingShareText {
+                ShareSheet(items: [pendingShareText])
+            }
+        }
+        .proFeatureAlerts(songSharingGate) { showPaywall = true }
     }
 
     private var singleSelectionShareText: String? {
@@ -257,6 +281,11 @@ struct SongsList: View {
     private func copyToDrafts(song: Song) {
         viewModel.copyToDrafts(song: song)
         showToastMessage("Copied \"\(song.title)\" to Drafts")
+    }
+
+    private func shareSong(_ song: Song) {
+        pendingShareText = SongUtils.shareText(song: song)
+        showShareSheet = true
     }
 
     private func showToastMessage(_ message: String) {

@@ -50,6 +50,7 @@ final class HomeViewModel: ObservableObject {
             subsRepo.isProUser(isOnline: isOnline) { isActive in
                 Task { @MainActor in
                     self.isProUser = isActive
+                    self.prefsRepo.isProUser = isActive
                     continuation.resume()
                 }
             }
