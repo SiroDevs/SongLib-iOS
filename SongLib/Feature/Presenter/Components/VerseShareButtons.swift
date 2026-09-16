@@ -7,6 +7,7 @@
 
 import SwiftUI
 import UIKit
+import RevenueCatUI
 
 /// "Copy" and "Share" actions for a single verse, shown at the bottom of
 /// its slide. Copy puts plain text on the clipboard; Share renders
@@ -23,6 +24,12 @@ struct VerseShareButtons: View {
     @State private var shareImage: UIImage?
     @State private var showShareSheet = false
 
+    // Copying and sharing a verse share one PRO usage allowance. This
+    // one component backs both the song presenter and the draft
+    // presenter, so it's the single place that needs gating for verses.
+    @StateObject private var verseSharingGate = ProFeatureGateModel(feature: .verseSharing)
+    @State private var showPaywall = false
+
     private var shareText: String {
         var text = verseText.trimmingCharacters(in: .whitespacesAndNewlines)
         text += "\n\n\(songTitle)"
@@ -35,12 +42,16 @@ struct VerseShareButtons: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            Button(action: copyVerse) {
+            Button {
+                verseSharingGate.attemptUse { copyVerse() }
+            } label: {
                 Label(copied ? "Copied" : "Copy", systemImage: copied ? "checkmark" : "doc.on.doc")
             }
             .buttonStyle(.bordered)
 
-            Button(action: shareVerse) {
+            Button {
+                verseSharingGate.attemptUse { shareVerse() }
+            } label: {
                 Label(isRendering ? "…" : "Share", systemImage: "square.and.arrow.up")
             }
             .buttonStyle(.bordered)
@@ -52,6 +63,12 @@ struct VerseShareButtons: View {
             if let shareImage {
                 ShareSheet(items: [shareImage])
             }
+        }
+        .proFeatureAlerts(verseSharingGate) { showPaywall = true }
+        .sheet(isPresented: $showPaywall) {
+        #if !DEBUG
+        PaywallView(displayCloseButton: true)
+        #endif
         }
     }
 

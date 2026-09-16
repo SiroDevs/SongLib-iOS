@@ -50,6 +50,7 @@ final class SelectionViewModel: ObservableObject {
     
     func updateProStatus(_ isPro: Bool) {
         isProUser = isPro
+        prefsRepo.isProUser = isPro
         showProLimitAlert = false
     }
     
@@ -102,6 +103,7 @@ final class SelectionViewModel: ObservableObject {
             subsRepo.isProUser(isOnline: isOnline) { isActive in
                 Task { @MainActor in
                     self.isProUser = isActive
+                    self.prefsRepo.isProUser = isActive
                     continuation.resume()
                 }
             }

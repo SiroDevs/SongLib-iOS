@@ -6,11 +6,15 @@
 //
 
 import SwiftUI
+import RevenueCatUI
 
 struct HomeSearch: View {
     @ObservedObject var viewModel: HomeViewModel
     @State private var searchQry: String = ""
     @State private var searchByNo: Bool = false
+
+    @StateObject private var searchByNoGate = ProFeatureGateModel(feature: .searchByNumber)
+    @State private var showPaywall = false
 
     @State private var editMode: EditMode = .inactive
     @State private var selectedIDs: Set<Int> = []
@@ -56,7 +60,7 @@ struct HomeSearch: View {
                     )
                 }
 
-                if viewModel.isProUser && !isEditing {
+                if !isEditing {
                     VStack(alignment: .trailing, spacing: 10) {
                         if !isAtTop {
                             ScrollToTopButton {
@@ -67,9 +71,11 @@ struct HomeSearch: View {
 
                         SearchByNoFAB(
                             onClick: {
-                                searchByNo = true
-                                searchQry = ""
-                                viewModel.searchSongs(qry: "", byNo: true)
+                                searchByNoGate.attemptUse {
+                                    searchByNo = true
+                                    searchQry = ""
+                                    viewModel.searchSongs(qry: "", byNo: true)
+                                }
                             },
                             expanded: isAtTop
                         )
@@ -137,6 +143,12 @@ struct HomeSearch: View {
                 }
                 .presentationDetents([.height(430)])
                 .presentationDragIndicator(.visible)
+            }
+            .proFeatureAlerts(searchByNoGate) { showPaywall = true }
+            .sheet(isPresented: $showPaywall) {
+            #if !DEBUG
+            PaywallView(displayCloseButton: true)
+            #endif
             }
         }
     }
