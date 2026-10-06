@@ -24,6 +24,10 @@ struct HomeSearch: View {
 
     private var isEditing: Bool { editMode == .active }
 
+    private var canShowReviewPrompt: Bool {
+        !isEditing && !searchByNo && !showPaywall && searchQry.isEmpty
+    }
+    
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottomTrailing) {
@@ -150,6 +154,7 @@ struct HomeSearch: View {
             PaywallView(displayCloseButton: true)
             #endif
             }
+            .reviewPrompt(isEnabled: canShowReviewPrompt)
         }
     }
 }
